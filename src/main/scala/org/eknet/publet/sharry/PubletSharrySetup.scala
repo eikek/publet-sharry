@@ -21,13 +21,15 @@ import _root_.com.google.inject.{Inject, Singleton}
 import org.eknet.publet.web.guice.PubletStartedEvent
 import org.eknet.publet.web.template.DefaultLayout
 import org.eknet.publet.web.asset.{Group, AssetManager, AssetCollection}
-import org.eknet.publet.vfs.util.ClasspathContainer
+import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.Publet
 import org.quartz.{DateBuilder, Scheduler}
 import org.eknet.publet.quartz.QuartzDsl
-import java.util.concurrent.TimeUnit
 import org.quartz.DateBuilder.IntervalUnit
+import org.eknet.publet.web.scripts.WebScriptResource
+import org.eknet.publet.sharry.ui.UploadHandler
+import org.eknet.publet.webeditor.{Assets => EditorAssets}
 
 @Singleton
 class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, scheduler: Scheduler) extends AssetCollection with QuartzDsl {
@@ -36,22 +38,28 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
 
   @Subscribe
   def mountResources(event: PubletStartedEvent) {
+    import org.eknet.publet.vfs.ResourceName.string2ResourceName
 
     val sharryAssets = Group("publet-sharry.assets")
       .add(resource("js/jquery.sharry.js"))
+      .add(resource("js/sharry.startup.js"))
       .require(DefaultLayout.Assets.bootstrap.name, DefaultLayout.Assets.jquery.name, DefaultLayout.Assets.mustache.name)
 
     val sharryAssetsConfigured = Group("publet-sharry.assets.configured")
       .forPath("/sharry/**")
       .use(sharryAssets.name)
 
-    assetMgr setup (sharryAssets, sharryAssetsConfigured)
+    assetMgr setup (sharryAssets, sharryAssetsConfigured, Assets.blueimpFileUpload)
    
     assetMgr setup
       Group("default").use(sharryAssetsConfigured.name)
 
     val cont = new ClasspathContainer(base = "/org/eknet/publet/sharry/includes/templ")
     publet.mountManager.mount(Path("/sharry"), cont)
+
+    val scripts = new MapContainer
+    scripts.addResource(new WebScriptResource("upload.json".rn, new UploadHandler))
+    publet.mountManager.mount(Path("/sharry/actions"), scripts)
   }
 
   @Subscribe
@@ -68,5 +76,22 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
       .build()
 
     scheduler.scheduleJob(jobdef, trigger)
+  }
+
+  private object Assets extends AssetCollection {
+    override def classPathBase = "/org/eknet/publet/webeditor/includes"
+
+
+    val blueimpFileUpload = Group("sharry.blueimp.fileupload")
+      .add(resource("img/loading.gif"))
+      .add(resource("img/progressbar.gif"))
+      .add(resource("img/publet_nopreview.png"))
+      .add(resource("css/jquery.fileupload-ui.css"))
+      .add(resource("js/jquery.fileupload.js"))
+      .add(resource("js/jquery.fileupload-fp.js"))
+      .add(resource("js/jquery.fileupload-ui.js"))
+      .add(resource("js/locale.js"))
+      .require(EditorAssets.jqueryIframeTransport.name, EditorAssets.jqueryUiWidget.name,
+      EditorAssets.blueimpTmpl.name, EditorAssets.blueimpLoadImage.name, DefaultLayout.Assets.jquery.name)
   }
 }
