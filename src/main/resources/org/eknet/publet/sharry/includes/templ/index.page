@@ -1,5 +1,6 @@
 ---
 title: Publet Sharry
+assetGroups: blueimp.fileupload
 
 --- name:content pipeline:jade
 
@@ -8,4 +9,5 @@ title: Publet Sharry
     | Publet Sharry
     small Safely share files
 
+- setAttribute("includeJs", Some(false))
 =include("_sharry.jade")
