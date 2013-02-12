@@ -16,30 +16,22 @@
 
 package org.eknet.publet.sharry
 
-import java.io.InputStream
-import org.apache.commons.fileupload.FileItem
-import java.nio.file.{Files, Path}
+import org.eknet.publet.quartz.QuartzJob
+import org.quartz.JobExecutionContext
+import grizzled.slf4j.Logging
 
 /**
- * @author Eike Kettner eike.kettner@gmail.com
- * @since 11.02.13 23:59
+ *
+ * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
+ * @since 12.02.13 08:15
+ * 
  */
-trait Entry {
+class FileDeleteJob(sharry: SharryService) extends QuartzJob with Logging {
 
-  def name: String
-  def inputStream: InputStream
-
-}
-
-object Entry {
-
-  def apply(item: FileItem) = new Entry {
-    val name = item.getName
-    def inputStream = item.getInputStream
-  }
-
-  def apply(file: Path) = new Entry {
-    val name = file.getFileName.toString
-    def inputStream = Files.newInputStream(file)
+  def perform(context: JobExecutionContext) {
+    val nofiles = sharry.removeFiles(FileName.outdated)
+    if (nofiles > 0) {
+      info("Removed "+ nofiles +" shared files")
+    }
   }
 }
