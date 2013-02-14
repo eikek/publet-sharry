@@ -30,6 +30,7 @@ form#fileupload(action={ actionUrl } method="POST" enctype="multipart/form-data"
       span.help-block
         | You can specify a password that is used to encrypt the files. If it is left empty, there is a random one generated for you.
       hr/
+      input(type="hidden" name="uploadKey" value="")
       table.table.table-striped
         tbody.files(data-toggle="modal-gallery" data-target="#modal-gallery")
 
