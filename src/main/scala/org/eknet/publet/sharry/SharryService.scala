@@ -29,12 +29,13 @@ trait SharryService {
    * Adds the given files by zipping them into one archive and encrypting this
    * archive. The file name is returned that can be used to lookup the file.
    *
-   * @param files
-   * @param password
-   * @param timeout
+   * @param files the files to add
+   * @param password the password used to encrypt the archive
+   * @param timeout how long the file is valid. after this timeout, the file can
+   *                will be subject to deletion
    * @return
    */
-  def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Timeout): Either[String, FileName]
+  def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Timeout): Either[Exception, FileName]
 
   /**
    * Looks up the encrypted archive.

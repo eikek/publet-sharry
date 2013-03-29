@@ -36,7 +36,7 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
 
   def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Timeout) = {
     if (getFolderSize >= maxSize) {
-      Left("Maximum folder size "+ ByteSize.bytes.normalizeString(maxSize) +" exceeded.")
+      Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(maxSize) +" exceeded."))
     } else {
       val name = FileName(until = System.currentTimeMillis()+ timeout.millis, owner = owner)
       val file = folder / name.fullName

@@ -22,69 +22,127 @@ import javax.crypto.{CipherInputStream, Cipher, CipherOutputStream}
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 import com.google.common.io.ByteStreams
 import com.google.common.hash.Hashing
+import java.security.SecureRandom
 
 /**
+ * Utility methods for symmetric encryption using AES.
+ *
+ * The encryption uses AES in CBC mode. The IV is created randomly and prepended
+ * to the cipher text. The first 16 bytes of the encrypted text is the IV.
+ *
+ * The password can be any char array. It is first run trough a message digest
+ * and the correct number of bytes are used for the AES key.
+ *
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.02.13 20:49
  */
 object SymmetricCrypt {
 
-  def hashString(name: CharSequence) = Hashing.sha512().hashString(name).asBytes()
+  def hashString(name: CharSequence) = Hashing.sha256().hashString(name).asBytes()
 
+  def createKey(password: Array[Char]) = hashString(password).drop(5).take(16)
+
+  /**
+   * Encrypts the file at the given path and writes it to the specifed `target`
+   * path. The target path must not exist.
+   *
+   * @param source
+   * @param target
+   * @param password
+   */
   def encrypt(source: Path, target: Path, password: Array[Char]) {
-    val key = hashString(password)
-    val iv = key.take(16)
+    val key = createKey(password)
     val in = source.getInput()
     val out = target.getOutput(StandardOpenOption.CREATE_NEW)
     in.exec {
       out.exec {
-        encrypt(in, out, key, iv)
+        encrypt(in, out, key)
       }
     }
   }
 
+  /**
+   * Decrypts the file at the given `source` path and writes it to the
+   * given `target` path. The `target` path must not exist.
+   *
+   * @param source
+   * @param target
+   * @param password
+   */
   def decrypt(source: Path, target: Path, password: Array[Char]) {
-    val key = hashString(password)
-    val iv = key.take(16)
+    val key = createKey(password)
     val in = source.getInput()
     val out = target.getOutput(StandardOpenOption.CREATE_NEW)
     in.exec {
       out.exec {
-        decrypt(in, out, key, iv)
+        decrypt(in, out, key)
       }
     }
   }
 
   def decrypt(source: Path, target: OutputStream, password: Array[Char]) {
-    val key = hashString(password)
-    val iv = key.take(16)
+    val key = createKey(password)
     val in = source.getInput()
     in.exec {
-      decrypt(in, target, key, iv)
+      decrypt(in, target, key)
     }
   }
 
-  def encrypt(source: InputStream, target: OutputStream, key: Array[Byte], iv: Array[Byte]) = {
-    val cipher = createCipher(key, iv)
+  /**
+   * Encryptes the bytes from the given input stream and writes them into the given output stream.
+   *
+   * Note that the outputsteam is closed by this method, since it is required to close the concrete
+   * [[javax.crypto.CipherOutputStream]]. Otherwise the final block is not encrypted properly. The
+   * input stream, however, is not closed by this method.
+   *
+   * The IV is created using [[java.security.SecureRandom]] and written as the first 16 bytes into
+   * the output stream.
+   *
+   * @param source
+   * @param target
+   * @param key
+   */
+  def encrypt(source: InputStream, target: OutputStream, key: Array[Byte]) = {
+    val ivbytes = new Array[Byte](16)
+    new SecureRandom().nextBytes(ivbytes)
+    val iv = new IvParameterSpec(ivbytes)
+    target.write(ivbytes)
+    val cipher = createCipher(key, iv, Cipher.ENCRYPT_MODE)
     val cout = new CipherOutputStream(target, cipher)
-    ByteStreams.copy(source, cout)
+    val result = ByteStreams.copy(source, cout)
+    cout.close()
+    result
   }
 
-  def decrypt(source: InputStream, target: OutputStream, key: Array[Byte], iv: Array[Byte]) = {
-    val cipher = createCipher(key, iv)
+  /**
+   * Decrypts the bytes from the input stream and writes them into the given outputstream.
+   *
+   * Note that the input stream is closed by this method, as it is necessary to call it
+   * on the concrete [[javax.crypto.CipherInputStream]], otherwise the last block is not
+   * decrypted. The given outputstream, however, is not closed by this method.
+   *
+   * It is assumed that the IV is located at the first 16 bytes in the input stream.
+   *
+   * @param source
+   * @param target
+   * @param key
+   */
+  def decrypt(source: InputStream, target: OutputStream, key: Array[Byte]) = {
+    val ivbytes = new Array[Byte](16)
+    source.read(ivbytes)
+    val iv = new IvParameterSpec(ivbytes)
+    val cipher = createCipher(key, iv, Cipher.DECRYPT_MODE)
     val cin = new CipherInputStream(source, cipher)
-    ByteStreams.copy(cin, target)
+    val result = ByteStreams.copy(cin, target)
+    cin.close()
+    result
   }
 
-  def createCipher(key: Array[Byte], iv: Array[Byte]) = {
+  def createCipher(key: Array[Byte], iv: IvParameterSpec, cipherMode: Int) = {
     require(key.length > 0, "A key must be provided.")
-    val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+    val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
     val keyspec = new SecretKeySpec(key, "AES")
-    if (iv.length > 0) {
-      cipher.init(Cipher.ENCRYPT_MODE, keyspec, new IvParameterSpec(iv))
-    } else {
-      cipher.init(Cipher.ENCRYPT_MODE, keyspec)
-    }
+    cipher.init(cipherMode, keyspec, iv)
     cipher
   }
 }

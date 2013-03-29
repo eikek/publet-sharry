@@ -22,10 +22,24 @@ import grizzled.slf4j.Logging
 import java.nio.file.Path
 
 /**
+ *
+ * @param time the timestamp this file was created
+ * @param until the timestamp until this file is valid. after this point in time, it
+ *              can safely be removed.
+ * @param owner the owner of this file. the subject who owns this file
+ * @param unique some unique string
+ * @param ext the file extension. default is "zip"
+ * @param version the version of this file. this can be useful if encryption changes later
+ *                to still be able to distinguish other versions when decrypting.
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 12.02.13 00:03
  */
-case class FileName(time: Long = System.currentTimeMillis(), until: Long = System.currentTimeMillis(), owner: String, unique: String = FileName.uniqueString, ext: String = "zip") {
+case class FileName(time: Long = System.currentTimeMillis(),
+                    until: Long = System.currentTimeMillis(),
+                    owner: String,
+                    unique: String = FileName.uniqueString,
+                    ext: String = "zip",
+                    version: Long = 1) {
 
   val fullName = {
     val buf = new StringBuilder
@@ -70,8 +84,8 @@ object FileName extends Logging {
 
   private object Parser extends RegexParsers {
 
-    def filename = timestamp ~"."~ timestamp ~"."~ unique ~"."~ owner ~"."~ ext ^^ {
-      case added ~"."~ until ~"."~ uniq ~"."~ login ~"."~ extension => new FileName(added, until, uniq, login, extension)
+    def filename = timestamp ~"."~ timestamp ~"."~ unique ~"."~ owner ~"."~ version ~"."~ ext ^^ {
+      case added ~"."~ until ~"."~ uniq ~"."~ login ~"."~ vers ~"."~ extension => new FileName(added, until, uniq, login, extension, vers)
       case x@_ => sys.error("Wrong file name: "+ x)
     }
 
@@ -79,6 +93,7 @@ object FileName extends Logging {
     private val owner = "[\\w]+".r
     private val unique = "[\\w]+".r
     private val ext = "[a-zA-Z0-9]+".r
+    private val version ="[0-9]+".r ^^ (_.toLong)
   }
 
 }
