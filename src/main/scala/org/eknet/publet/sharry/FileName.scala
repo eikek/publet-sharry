@@ -27,7 +27,7 @@ import java.nio.file.Path
  * @param until the timestamp until this file is valid. after this point in time, it
  *              can safely be removed.
  * @param owner the owner of this file. the subject who owns this file
- * @param unique some unique string
+ * @param checksum checksum of the content
  * @param ext the file extension. default is "zip"
  * @param version the version of this file. this can be useful if encryption changes later
  *                to still be able to distinguish other versions when decrypting.
@@ -37,15 +37,17 @@ import java.nio.file.Path
 case class FileName(time: Long = System.currentTimeMillis(),
                     until: Long = System.currentTimeMillis(),
                     owner: String,
-                    unique: String = FileName.uniqueString,
+                    checksum: String,
                     ext: String = "zip",
                     version: Long = 1) {
+
+  require(checksum != null, "checksum must be specified")
 
   val fullName = {
     val buf = new StringBuilder
     buf.append(time).append(".")
     buf.append(until).append(".")
-    buf.append(unique).append(".")
+    buf.append(checksum).append(".")
     buf.append(owner).append(".")
     buf.append(ext)
     buf.toString()

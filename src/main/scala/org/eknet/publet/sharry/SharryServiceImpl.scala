@@ -23,6 +23,8 @@ import com.google.inject.{Singleton, Inject}
 import java.util.concurrent.atomic.{AtomicLong, AtomicInteger}
 import com.google.inject.name.Named
 import org.eknet.publet.vfs.util.ByteSize
+import java.security.{DigestOutputStream, MessageDigest}
+import javax.xml.bind.DatatypeConverter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -38,9 +40,12 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
     if (getFolderSize >= maxSize) {
       Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(maxSize) +" exceeded."))
     } else {
-      val name = FileName(until = System.currentTimeMillis()+ timeout.millis, owner = owner)
+      val zip = FileIO.zipDir(FileIO.store(files))
+      val checksum = createMd5(zip.getInput())
+      val name = FileName(until = System.currentTimeMillis()+ timeout.millis, owner = owner, checksum = checksum)
       val file = folder / name.fullName
-      FileIO.storeAndEncryptFiles(files, password, file)
+      SymmetricCrypt.encrypt(zip, file, password.toCharArray)
+      zip.deleteIfExists()
       Right(name)
     }
   }
@@ -49,14 +54,29 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
 
   def decryptFile(name: FileName, password: String, out: OutputStream) {
     lookupFile(name) match {
-      case Some(file) => SymmetricCrypt.decrypt(file, out, password.toCharArray)
+      case Some(file) => {
+        val md5 = MessageDigest.getInstance("MD5")
+        val mdout = new DigestOutputStream(out, md5)
+        SymmetricCrypt.decrypt(file, mdout, password.toCharArray)
+        mdout.flush()
+        val digest = DatatypeConverter.printHexBinary(md5.digest()).toLowerCase
+        if (digest != name.checksum) {
+          ioError("Decrypting failed.")
+        }
+      }
       case None => ioError("Cannot find file: "+ name)
     }
   }
 
   def decryptFile(name: FileName, password: String, target: Path) {
     lookupFile(name) match {
-      case Some(file) => SymmetricCrypt.decrypt(file, target, password.toCharArray)
+      case Some(file) => {
+        SymmetricCrypt.decrypt(file, target, password.toCharArray)
+        val digest = createMd5(target.getInput())
+        if (digest != name.checksum) {
+          ioError("Decrypting failed.")
+        }
+      }
       case None => ioError("Cannot find file: "+ name)
     }
   }

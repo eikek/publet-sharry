@@ -21,7 +21,9 @@ import java.nio.file.DirectoryStream.Filter
 import java.nio.charset.Charset
 import scala.Some
 import java.nio.file.{FileVisitResult, SimpleFileVisitor, OpenOption, StandardCopyOption, AtomicMoveNotSupportedException, CopyOption, Files, Path}
-import java.io.{IOException, InputStreamReader, BufferedReader, OutputStreamWriter, BufferedWriter, OutputStream, InputStream}
+import java.io.{BufferedInputStream, IOException, InputStreamReader, BufferedReader, OutputStreamWriter, BufferedWriter, OutputStream, InputStream}
+import java.security.{DigestInputStream, MessageDigest}
+import javax.xml.bind.DatatypeConverter
 
 /**
  *
@@ -221,4 +223,11 @@ package object files {
   implicit def enrichtClosable(ac: AutoCloseable) = new RicherClosable(ac)
   implicit def unrichClosable(rc: RicherClosable) = rc.ac
 
+  def createMd5(in: InputStream) = {
+    val md5 = MessageDigest.getInstance("MD5")
+    val mdin = new BufferedInputStream(new DigestInputStream(in, md5))
+    while (mdin.read() != -1) {}
+    mdin.close()
+    DatatypeConverter.printHexBinary(md5.digest()).toLowerCase
+  }
 }

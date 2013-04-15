@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
 import scala.collection.mutable.ListBuffer
 import java.util.concurrent.atomic.AtomicInteger
+import java.io.{IOException, ByteArrayOutputStream}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -36,6 +37,14 @@ class SharryServiceSuite extends FunSuite with ShouldMatchers {
     val output = testfolder.resolve("testout.zip")
     output.deleteIfExists()
     sharry.decryptFile(name, "testpw", output)
+    sharry.decryptFile(name, "testpw", new ByteArrayOutputStream())
+
+    intercept[IOException] {
+      sharry.decryptFile(name, "testpwWRONG", output)
+    }
+    intercept[IOException] {
+      sharry.decryptFile(name, "testpwXZ", new ByteArrayOutputStream())
+    }
 
     val zin = new ZipInputStream(output.getInput())
     var entry = zin.getNextEntry
