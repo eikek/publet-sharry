@@ -31,7 +31,7 @@ class SharryServiceSuite extends FunSuite with ShouldMatchers {
     testfolder.ensureDirectories()
     testfolder.deleteTree()
     val sharry = new SharryServiceImpl(testfolder, 1)
-    val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw", Timeout.apply(2, TimeUnit.MILLISECONDS))
+    val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw".toCharArray, Some(Timeout(2, TimeUnit.MILLISECONDS)))
 
     val name = result.fold(e => throw e, identity)
     val output = testfolder.resolve("testout.zip")

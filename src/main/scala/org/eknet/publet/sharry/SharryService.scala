@@ -35,7 +35,7 @@ trait SharryService {
    *                will be subject to deletion
    * @return
    */
-  def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Timeout): Either[Exception, FileName]
+  def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]): Either[Exception, FileName]
 
   /**
    * Looks up the encrypted archive.
@@ -74,4 +74,13 @@ trait SharryService {
    * @return the number of files deleted
    */
   def removeFiles(filter: FileName => Boolean): Int
+
+
+  /**
+   * Lists all files currently available.
+   *
+   * @return
+   */
+  def listFiles: Iterable[FileName]
+
 }

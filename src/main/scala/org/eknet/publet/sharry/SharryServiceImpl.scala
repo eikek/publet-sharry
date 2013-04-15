@@ -17,14 +17,15 @@
 package org.eknet.publet.sharry
 
 import grizzled.slf4j.Logging
-import java.nio.file.{FileVisitResult, Path}
+import java.nio.file.{DirectoryStream, Files, FileVisitResult, Path}
 import java.io.OutputStream
 import com.google.inject.{Singleton, Inject}
 import java.util.concurrent.atomic.{AtomicLong, AtomicInteger}
 import com.google.inject.name.Named
 import org.eknet.publet.vfs.util.ByteSize
-import java.security.{DigestOutputStream, MessageDigest}
+import java.security.{SecureRandom, DigestOutputStream, MessageDigest}
 import javax.xml.bind.DatatypeConverter
+import java.nio.file.DirectoryStream.Filter
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -36,15 +37,22 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
   import files._
   folder.ensureDirectories()
 
-  def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Timeout) = {
+  private val fileFilter =  (entry: Path) => Files.isRegularFile(entry) && FileName.tryParse(entry).isDefined
+
+  private implicit def toFilter(ff: Path => Boolean) = new Filter[Path] {
+    def accept(entry: Path) = ff(entry)
+  }
+
+  def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]) = {
+    require(owner != null && !owner.isEmpty, "Owner is required")
     if (getFolderSize >= maxSize) {
       Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(maxSize) +" exceeded."))
     } else {
       val zip = FileIO.zipDir(FileIO.store(files))
       val checksum = createMd5(zip.getInput())
-      val name = FileName(until = System.currentTimeMillis()+ timeout.millis, owner = owner, checksum = checksum)
+      val name = FileName(until = timeout.map(_.millis + System.currentTimeMillis()).getOrElse(0L), owner = owner, checksum = checksum)
       val file = folder / name.fullName
-      SymmetricCrypt.encrypt(zip, file, password.toCharArray)
+      SymmetricCrypt.encrypt(zip, file, password)
       zip.deleteIfExists()
       Right(name)
     }
@@ -83,13 +91,10 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
 
   def removeFiles(filter: FileName => Boolean) = {
     val counter = new AtomicInteger(0)
-    folder.visitFiles(file => {
-      if (filter(FileName(file))) {
-        file.deleteIfExists()
-        counter.incrementAndGet()
-      }
-      FileVisitResult.CONTINUE
-    })
+    listFiles.withFilter(filter).foreach { name =>
+      (folder / name.fullName).deleteIfExists()
+      counter.incrementAndGet()
+    }
     counter.get()
   }
 
@@ -97,5 +102,15 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
     val size = new AtomicLong(0)
     folder.visitFiles(f => { size.addAndGet(f.fileSize); FileVisitResult.CONTINUE })
     size.get()
+  }
+
+  def listFiles = new Iterable[FileName] {
+    def iterator = new FileIterator
+  }
+
+  class FileIterator extends Iterator[FileName] {
+    val stream = Files.newDirectoryStream(folder, fileFilter).iterator()
+    def hasNext = stream.hasNext
+    def next() = FileName(stream.next())
   }
 }

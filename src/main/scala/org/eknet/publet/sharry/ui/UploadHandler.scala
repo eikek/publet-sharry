@@ -18,19 +18,34 @@ package org.eknet.publet.sharry.ui
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.{PubletWebContext, RenderUtils}
+import org.eknet.publet.sharry.{FileName, Entry}
+import org.eknet.publet.web.shiro.Security
+import grizzled.slf4j.Logging
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 12.02.13 20:14
  */
-class UploadHandler extends ScalaScript {
+class UploadHandler extends ScalaScript with Logging {
 
   def serve() = {
-    val uploads = PubletWebContext.uploads
-    val password = PubletWebContext.param("password")
-    makeJson(Array())
+    val uploads = PubletWebContext.uploads.map { i => new FileItemEntry(i) }
+    val password = PubletWebContext.param("password").filter(!_.isEmpty).map(_.toCharArray).getOrElse(randomPassword(18))
+    val name = sharry.addFiles(uploads, Security.username, password, None)
+
+    name.fold(failure, success(password)_)
   }
 
+  private def success(password: Array[Char])(name: FileName) = makeJson(Map(
+    "success" -> true,
+    "password" -> new String(password),
+    "name" -> name.fullName,
+    "size" -> 0,
+    "url" -> ("http://localhost:8081/sharry/"+name.fullName)
+  ))
 
-  def makeJson(data: Any) = RenderUtils.makeJson(data)
+  private def failure(exc: Exception) = {
+    error("Error adding files!", exc)
+    makeJson(Map("success" -> false, "message" -> exc.getMessage))
+  }
 }

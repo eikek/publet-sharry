@@ -6,7 +6,28 @@ $(function() {
     autoUpload: false
   });
 
+  fileupload.bind('fileuploaddone', function(e, data) {
+    var templ = '<div class="hero-unit">' +
+        '<h2>Upload successful!</h2><br/>'+
+        '<p>Download the file at </p>'+
+        '<p><a href="{{url}}">{{url}}</a> <br/></p>'+
+        '<p>Your password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +
+        '<hr/>'+
+        '<p><a class="btn btn-primary btn-large" href="#"><i class="icon-envelope icon-white"></i> Share via Email</a> </div></p>' +
+        '</div>';
 
+    fileupload.html(Mustache.render(templ, data.result));
+    fileupload.find('.showPasswordButton').click(function(e) {
+      var pw = fileupload.find('.password').css("display");
+      if (pw === "none") {
+        fileupload.find('.password').css('display', 'inline');
+        $(e.target).text("Hide Password");
+      } else {
+        fileupload.find('.password').css('display', 'none');
+        $(e.target).text("Show Password");
+      }
+    });
+  });
   fileupload.bind('fileuploadstart', function (e, data) {
     fileupload.mask({
       spinner: {

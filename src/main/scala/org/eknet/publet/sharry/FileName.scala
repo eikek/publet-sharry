@@ -16,7 +16,6 @@
 
 package org.eknet.publet.sharry
 
-import java.util.UUID
 import scala.util.parsing.combinator.RegexParsers
 import grizzled.slf4j.Logging
 import java.nio.file.Path
@@ -60,29 +59,12 @@ case class FileName(time: Long = System.currentTimeMillis(),
 object FileName extends Logging {
 
   def apply(name: Path): FileName = FileName(name.getFileName.toString)
+  def apply(name: String): FileName = Parser.parseFilename(name).fold(x => sys.error(x), identity)
 
-  def apply(name: String): FileName = {
-    try {
-      Parser.parseAll(Parser.filename, name).get
-    } catch {
-      case e: RuntimeException => throw new RuntimeException("Parsing filename failed: "+ name, e)
-    }
-  }
+  def tryParse(name: String): Option[FileName] = Parser.parseFilename(name).fold(x => None, Some(_))
+  def tryParse(name: Path): Option[FileName] = tryParse(name.getFileName.toString)
 
-  def tryParse(name: String) = {
-    try {
-      Some(Parser.parseAll(Parser.filename, name).get)
-    } catch {
-      case e: RuntimeException => {
-        warn("Invalid filename encountered: "+ name)
-        None
-      }
-    }
-  }
-
-  def uniqueString = UUID.randomUUID().toString.replace("-", "")
-
-  val outdated: FileName => Boolean = _.until <= System.currentTimeMillis()
+  val outdated: FileName => Boolean = name => name.until > 0 && name.until <= System.currentTimeMillis()
 
   private object Parser extends RegexParsers {
 
@@ -96,6 +78,11 @@ object FileName extends Logging {
     private val unique = "[\\w]+".r
     private val ext = "[a-zA-Z0-9]+".r
     private val version ="[0-9]+".r ^^ (_.toLong)
+
+    def parseFilename(name: String) = parseAll(filename, name) match {
+      case Success(result, _) => Right(result)
+      case failure: NoSuccess => Left(failure.msg)
+    }
   }
 
 }
