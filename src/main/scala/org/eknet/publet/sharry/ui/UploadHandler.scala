@@ -18,9 +18,10 @@ package org.eknet.publet.sharry.ui
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.util.{PubletWebContext, RenderUtils}
-import org.eknet.publet.sharry.{FileName, Entry}
 import org.eknet.publet.web.shiro.Security
 import grizzled.slf4j.Logging
+import org.eknet.publet.vfs.util.ByteSize
+import org.eknet.publet.sharry.lib.FileName
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -39,8 +40,11 @@ class UploadHandler extends ScalaScript with Logging {
   private def success(password: Array[Char])(name: FileName) = makeJson(Map(
     "success" -> true,
     "password" -> new String(password),
+    "size" -> name.size,
+    "sizeString" -> ByteSize.bytes.normalizeString(name.size),
+    "created" -> name.date.getTime,
+    "checksum" -> name.checksum,
     "name" -> name.fullName,
-    "size" -> 0,
     "url" -> ("http://localhost:8081/sharry/"+name.fullName)
   ))
 

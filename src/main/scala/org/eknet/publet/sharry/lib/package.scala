@@ -30,7 +30,7 @@ import javax.xml.bind.DatatypeConverter
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 11.02.13 22:07
  */
-package object files {
+package object lib {
 
 
   implicit def decoratePath(p: Path) = new DecoratedPath(p)

@@ -20,6 +20,7 @@ package org.eknet.publet.sharry
 import org.eknet.publet.web.util.{PubletWeb, RenderUtils}
 import java.security.SecureRandom
 import org.apache.commons.fileupload.FileItem
+import org.eknet.publet.sharry.lib.{SharryService, Entry}
 
 /**
  *

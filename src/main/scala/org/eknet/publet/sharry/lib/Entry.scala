@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.sharry
+package org.eknet.publet.sharry.lib
 
 import java.io.InputStream
-import org.apache.commons.fileupload.FileItem
 import java.nio.file.{Files, Path}
+import org.apache.commons.fileupload.FileItem
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

@@ -15,7 +15,8 @@ import java.io.{IOException, ByteArrayOutputStream}
  */
 class SharryServiceSuite extends FunSuite with ShouldMatchers {
 
-  import files._
+  import lib._
+  import Timeout._
 
   val textfile1 = new Entry {
     def name = "textfile"
@@ -31,7 +32,7 @@ class SharryServiceSuite extends FunSuite with ShouldMatchers {
     testfolder.ensureDirectories()
     testfolder.deleteTree()
     val sharry = new SharryServiceImpl(testfolder, 1)
-    val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw".toCharArray, Some(Timeout(2, TimeUnit.MILLISECONDS)))
+    val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw".toCharArray, Some(2.seconds))
 
     val name = result.fold(e => throw e, identity)
     val output = testfolder.resolve("testout.zip")

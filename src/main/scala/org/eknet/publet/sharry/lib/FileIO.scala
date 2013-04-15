@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.sharry.files
+package org.eknet.publet.sharry.lib
 
-import org.apache.commons.fileupload.FileItem
 import java.nio.file._
 import java.util.zip.{ZipEntry, ZipOutputStream}
-import com.google.common.io.{InputSupplier, OutputSupplier, ByteStreams}
-import java.io.{InputStream, OutputStream}
-import org.eknet.publet.sharry.Entry
+import com.google.common.io.ByteStreams
+import java.io.InputStream
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

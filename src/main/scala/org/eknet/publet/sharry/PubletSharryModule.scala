@@ -23,6 +23,7 @@ import com.google.inject.Provides
 import org.eknet.publet.vfs.util.ByteSize
 import com.google.inject.name.Named
 import grizzled.slf4j.Logging
+import org.eknet.publet.sharry.lib.{SharryServiceImpl, SharryService}
 
 class PubletSharryModule extends AbstractPubletModule with PubletBinding with PubletModule with Logging {
 

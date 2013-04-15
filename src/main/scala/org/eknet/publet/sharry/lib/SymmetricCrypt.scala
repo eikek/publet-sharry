@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.sharry.files
+package org.eknet.publet.sharry.lib
 
 import java.nio.file.{StandardOpenOption, Path}
 import java.io.{OutputStream, InputStream}

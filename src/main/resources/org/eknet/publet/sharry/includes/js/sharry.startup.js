@@ -10,7 +10,7 @@ $(function() {
     var templ = '<div class="hero-unit">' +
         '<h2>Upload successful!</h2><br/>'+
         '<p>Download the file at </p>'+
-        '<p><a href="{{url}}">{{url}}</a> <br/></p>'+
+        '<p><a href="{{url}}">{{url}} ({{sizeString}})</a> <br/></p>'+
         '<p>Your password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +
         '<hr/>'+
         '<p><a class="btn btn-primary btn-large" href="#"><i class="icon-envelope icon-white"></i> Share via Email</a> </div></p>' +

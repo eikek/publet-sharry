@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.eknet.publet.sharry
+package org.eknet.publet.sharry.lib
 
-import grizzled.slf4j.Logging
-import java.nio.file.{DirectoryStream, Files, FileVisitResult, Path}
-import java.io.OutputStream
-import com.google.inject.{Singleton, Inject}
-import java.util.concurrent.atomic.{AtomicLong, AtomicInteger}
 import com.google.inject.name.Named
-import org.eknet.publet.vfs.util.ByteSize
-import java.security.{SecureRandom, DigestOutputStream, MessageDigest}
-import javax.xml.bind.DatatypeConverter
+import com.google.inject.{Singleton, Inject}
+import grizzled.slf4j.Logging
+import java.io.OutputStream
 import java.nio.file.DirectoryStream.Filter
+import java.nio.file.{Files, FileVisitResult, Path}
+import java.security.{DigestOutputStream, MessageDigest}
+import java.util.concurrent.atomic.{AtomicLong, AtomicInteger}
+import javax.xml.bind.DatatypeConverter
+import org.eknet.publet.vfs.util.ByteSize
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,7 +34,6 @@ import java.nio.file.DirectoryStream.Filter
 @Singleton
 class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("maxSharryFolderSize") maxSize: Long) extends SharryService with Logging {
 
-  import files._
   folder.ensureDirectories()
 
   private val fileFilter =  (entry: Path) => Files.isRegularFile(entry) && FileName.tryParse(entry).isDefined
@@ -50,7 +49,12 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
     } else {
       val zip = FileIO.zipDir(FileIO.store(files))
       val checksum = createMd5(zip.getInput())
-      val name = FileName(until = timeout.map(_.millis + System.currentTimeMillis()).getOrElse(0L), owner = owner, checksum = checksum)
+      val name = FileName(
+        until = timeout.map(_.millis + System.currentTimeMillis()).getOrElse(0L),
+        owner = owner,
+        checksum = checksum,
+        size = zip.fileSize
+      )
       val file = folder / name.fullName
       SymmetricCrypt.encrypt(zip, file, password)
       zip.deleteIfExists()
@@ -105,10 +109,10 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
   }
 
   def listFiles = new Iterable[FileName] {
-    def iterator = new FileIterator
+    def iterator: Iterator[FileName] = new FileIterator
   }
 
-  class FileIterator extends Iterator[FileName] {
+  private class FileIterator extends Iterator[FileName] {
     val stream = Files.newDirectoryStream(folder, fileFilter).iterator()
     def hasNext = stream.hasNext
     def next() = FileName(stream.next())
