@@ -12,7 +12,7 @@ assetGroups: sharry.blueimp.fileupload
 
 .page-header
   h1
-    | Publet Sharry
+    | »Sharry«
     small Safely share files
 
 - setAttribute("includeJs", Some(false))

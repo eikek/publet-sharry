@@ -1,7 +1,7 @@
 $(function() {
 
   var fileupload = $('#fileupload').fileupload({
-    singleFileUploads: true,
+    singleFileUploads: false,
     limitConcurrentUploads: 2,
     autoUpload: false
   });
