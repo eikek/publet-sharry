@@ -44,6 +44,7 @@ class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("
 
   def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]) = {
     require(owner != null && !owner.isEmpty, "Owner is required")
+    require(password != null && password.length > 0, "password is required")
     if (getFolderSize >= maxSize) {
       Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(maxSize) +" exceeded."))
     } else {
