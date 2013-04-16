@@ -13,6 +13,7 @@ assetGroups: sharry.blueimp.fileupload
   });
 
 --- name:content pipeline:jade
+- Security.checkAuthenticated()
 
 .page-header
   h1

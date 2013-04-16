@@ -22,16 +22,14 @@ import org.eknet.publet.web.guice.PubletStartedEvent
 import org.eknet.publet.web.template.DefaultLayout
 import org.eknet.publet.web.asset.{Group, AssetManager, AssetCollection}
 import org.eknet.publet.vfs.util.{MapContainer, ClasspathContainer}
-import org.eknet.publet.vfs.{ContentType, ResourceName, ContentResource, Path}
+import org.eknet.publet.vfs.Path
 import org.eknet.publet.Publet
 import org.quartz.{DateBuilder, Scheduler}
 import org.eknet.publet.quartz.QuartzDsl
 import org.quartz.DateBuilder.IntervalUnit
 import org.eknet.publet.web.scripts.WebScriptResource
-import org.eknet.publet.sharry.ui.{DownloadHandler, UploadHandler}
+import org.eknet.publet.sharry.ui.{MailSender, DownloadHandler, UploadHandler}
 import org.eknet.publet.webeditor.{Assets => EditorAssets}
-import org.eknet.publet.web.{ErrorResponse, CustomContent}
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
 @Singleton
 class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, scheduler: Scheduler) extends AssetCollection with QuartzDsl {
@@ -61,6 +59,7 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
 
     val scripts = new MapContainer
     scripts.addResource(new WebScriptResource("upload.json".rn, new UploadHandler))
+    scripts.addResource(new WebScriptResource("sharemail.json".rn, new MailSender))
     scripts.addResource(new DownloadHandler("download".rn))
     publet.mountManager.mount(Path("/sharry/actions"), scripts)
   }

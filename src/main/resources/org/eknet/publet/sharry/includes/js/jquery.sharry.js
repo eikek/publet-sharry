@@ -84,6 +84,19 @@
           var msg = Mustache.render(emailTextTemplate, settings.result);
           $this.find('.sharryShareEmail textarea[name="message"]').val(msg);
           showScreens($this, ["sharryUploadDoneOk", "sharryShareEmail"]);
+          $this.find('.sharryShareEmail form').ajaxForm({
+            beforeSubmit: function(arr, form, options) {
+              form.mask();
+            },
+            success: function(resp, status, xhr, form) {
+              form.unmask();
+              var css = resp.success === false ? "alert-error" : "alert-success";
+              form.find('.mailFeedback').feedbackMessage({
+                message: resp.message,
+                cssClass: 'alert ' + css
+              });
+            }
+          });
         });
       }
       showScreens($this, ["sharryUploadDoneOk"]);
@@ -219,6 +232,7 @@
 
   var shareEmailTemplate =
       '<form action="{{shareMailUrl}}">' +
+      '  <div class="mailFeedback"></div>'+
       '  <fieldset>'+
       '  <label>Receivers <small style="color:#666;">(list of emails, for example: me@gmail.com, john.doe@hotmail.com)</small></label>'+
       '  <input class="input-block-level" type="text" name="receivers" required="required"/> '+
@@ -226,7 +240,7 @@
       '  <input class="input-block-level" type="text" name="subject"/>' +
       '  <label>Message</label>'+
       '  <textarea class="input-block-level" name="message" cols="30" rows="10"/>' +
-      '  <br/><a href="#" class="btn btn-primary"><i class="icon-envelope icon-white"></i> Send</a> '+
+      '  <br/><button href="#" class="btn btn-primary"><i class="icon-envelope icon-white"></i> Send</button> '+
       '  </fieldset>'+
       '</form>';
 
