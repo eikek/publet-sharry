@@ -56,8 +56,6 @@ case class FileName(time: Long = System.currentTimeMillis(),
     buf.toString()
   }
 
-  lazy val date = new java.util.Date(time)
-
 }
 
 object FileName extends Logging {

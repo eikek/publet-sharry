@@ -17,7 +17,7 @@
 
 package org.eknet.publet.sharry
 
-import org.eknet.publet.web.util.{PubletWeb, RenderUtils}
+import org.eknet.publet.web.util.{PubletWebContext, PubletWeb, RenderUtils}
 import java.security.SecureRandom
 import org.apache.commons.fileupload.FileItem
 import org.eknet.publet.sharry.lib.{SharryService, Entry}
@@ -28,6 +28,9 @@ import org.eknet.publet.sharry.lib.{SharryService, Entry}
  * @since 15.04.13 19:00
  */
 package object ui {
+
+  def param(name: String) = PubletWebContext.param(name).filter(!_.isEmpty)
+  def longParam(name: String) = param(name).map(_.toLong)
 
   def makeJson(data: Any) = RenderUtils.makeJson(data)
 
@@ -42,7 +45,7 @@ package object ui {
   }
 
 
-  class FileItemEntry(i: FileItem) extends Entry {
+  case class FileItemEntry(i: FileItem) extends Entry {
     def name = i.getName
     def inputStream = i.getInputStream
   }

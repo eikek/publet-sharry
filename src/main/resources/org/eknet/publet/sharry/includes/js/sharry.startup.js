@@ -7,9 +7,11 @@ $(function() {
   });
 
   fileupload.bind('fileuploaddone', function(e, data) {
+    fileupload.unmask();
     var templ = '<div class="hero-unit">' +
         '<h2>Download ready!</h2><br/>'+
         '<p><a href="{{url}}">{{url}} ({{sizeString}})</a> <br/></p>'+
+        '<p>Valid until: {{validUntilDate}}</p>'+
         '<p>Password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +
         '<hr/>'+
         '<p><a class="btn btn-primary btn-large" href="#"><i class="icon-envelope icon-white"></i> Share via Email</a> </div></p>' +
@@ -38,10 +40,6 @@ $(function() {
       label: "Please wait ...",
       overlayOpacity: 0.35
     });
-  });
-
-  fileupload.bind('fileuploaddone', function(e, data) {
-    fileupload.unmask();
   });
 
   function randomString() {

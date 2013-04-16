@@ -83,4 +83,11 @@ trait SharryService {
    */
   def listFiles: Iterable[FileName]
 
+  /**
+   * Returns the size the folder currently occupies.
+   *
+   * @return
+   */
+  def getFolderSize: Long
+
 }
