@@ -71,7 +71,8 @@ object FileName extends Logging {
   private object Parser extends RegexParsers {
 
     def filename = timestamp ~"."~ timestamp ~"."~ checksum ~"."~ owner ~"."~ size ~"."~ version ~"."~ ext ^^ {
-      case added ~"."~ until ~"."~ uniq ~"."~ login ~"."~ sz ~"."~ vers ~"."~ extension => new FileName(added, until, uniq, login, sz, extension, vers)
+      case added ~"."~ until ~"."~ uniq ~"."~ login ~"."~ sz ~"."~ vers ~"."~ extension =>
+        new FileName(added, until, login, uniq, sz, extension, vers)
       case x@_ => sys.error("Wrong file name: "+ x)
     }
 

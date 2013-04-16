@@ -51,7 +51,7 @@ class UploadHandler extends ScalaScript with Logging {
     "checksum" -> name.checksum,
     "owner" -> name.owner,
     "name" -> name.fullName,
-    "url" -> ("http://localhost:8081/sharry/"+name.fullName)
+    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+name.fullName)
   ))
 
   private def failure(exc: Exception) = {

@@ -1,0 +1,22 @@
+---
+title: Publet Sharry
+assetGroups: sharry.blueimp.fileupload
+
+--- name:head pipeline:jade
+
+--- name:content pipeline:jade
+
+.page-header
+  h1
+    | »Sharry«
+    small Safely share files
+
+.well
+  h2 Download
+  p Give the correct password for this download. If the password is wrong, you'll receive a file anyways, but it will be empty.
+  form(action="actions/download.zip" method="post")
+    label Password:
+    input.input-xlarge(type="password" name="password" required="required")
+    input(type="hidden" name="filename" value={ PubletWebContext.param("f").getOrElse("") })
+    br/
+    button.btn.btn-primary(href="#" type="submit") Download

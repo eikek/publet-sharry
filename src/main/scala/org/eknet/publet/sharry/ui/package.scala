@@ -44,7 +44,6 @@ package object ui {
     pw.toArray
   }
 
-
   case class FileItemEntry(i: FileItem) extends Entry {
     def name = i.getName
     def inputStream = i.getInputStream

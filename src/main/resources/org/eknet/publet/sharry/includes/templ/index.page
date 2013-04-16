@@ -7,6 +7,10 @@ assetGroups: sharry.blueimp.fileupload
   .loadmask {
     background: #eee;
   }
+:javascript
+  $(function() {
+    $('#sharry').sharry();
+  });
 
 --- name:content pipeline:jade
 
@@ -15,5 +19,11 @@ assetGroups: sharry.blueimp.fileupload
     | »Sharry«
     small Safely share files
 
-- setAttribute("includeJs", Some(false))
-=include("_sharry.jade")
+.row
+  .span8
+    #sharry
+  .span4
+    p.alert.alert-info Browse your uploads.
+
+-# - setAttribute("includeJs", Some(false))
+-# =include("_sharry.jade")
