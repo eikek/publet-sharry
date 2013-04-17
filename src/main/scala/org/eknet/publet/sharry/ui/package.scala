@@ -21,13 +21,16 @@ import org.eknet.publet.web.util.{PubletWebContext, PubletWeb, RenderUtils}
 import java.security.SecureRandom
 import org.apache.commons.fileupload.FileItem
 import org.eknet.publet.sharry.lib.{SharryService, Entry}
+import org.eknet.publet.ext.{MailSupport, MailSessionFactory}
+import org.eknet.publet.web.Config
+import com.google.common.base.Splitter
 
 /**
  *
  * @author <a href="mailto:eike.kettner@gmail.com">Eike Kettner</a>
  * @since 15.04.13 19:00
  */
-package object ui {
+package object ui extends MailSupport {
 
   def param(name: String) = PubletWebContext.param(name).filter(!_.isEmpty)
   def longParam(name: String) = param(name).map(_.toLong)
@@ -44,8 +47,28 @@ package object ui {
     pw.toArray
   }
 
-  case class FileItemEntry(i: FileItem) extends Entry {
-    def name = i.getName
-    def inputStream = i.getInputStream
+  def sendMails(from: String, tos: String, subject: String, text: String): Either[Exception, String] = {
+    def isValid(str: String) = str != null && !str.isEmpty
+    import collection.JavaConversions._
+    if (mailSession.getSmtpHost.isEmpty || !isValid(from) || !isValid(tos) || !isValid(subject)) {
+      Left(new IllegalArgumentException("To less arguments for sending mail."))
+    } else {
+      try {
+        Splitter.on(',').trimResults().omitEmptyStrings().split(tos).foreach { receiver =>
+          newMail(from)
+            .to(receiver)
+            .subject(subject)
+            .text(text)
+            .send()
+        }
+        Right("Mails sent")
+      } catch {
+        case e: Exception => Left(e)
+      }
+    }
   }
+
+  def mailSession = PubletWeb.instance[MailSessionFactory].get
+  def config = PubletWeb.instance[Config].get
+
 }

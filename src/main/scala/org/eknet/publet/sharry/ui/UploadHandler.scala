@@ -21,8 +21,9 @@ import org.eknet.publet.web.util.{PubletWebContext, RenderUtils}
 import org.eknet.publet.web.shiro.Security
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.ByteSize
-import org.eknet.publet.sharry.lib.FileName
+import org.eknet.publet.sharry.lib.{Entry, FileName}
 import java.text.DateFormat
+import org.apache.commons.fileupload.FileItem
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -57,5 +58,10 @@ class UploadHandler extends ScalaScript with Logging {
   private def failure(exc: Exception) = {
     error("Error adding files!", exc)
     makeJson(Map("success" -> false, "message" -> exc.getMessage))
+  }
+
+  case class FileItemEntry(i: FileItem) extends Entry {
+    def name = i.getName
+    def inputStream = i.getInputStream
   }
 }
