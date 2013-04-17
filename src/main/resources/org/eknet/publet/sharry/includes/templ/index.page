@@ -10,6 +10,7 @@ assetGroups: sharry.blueimp.fileupload
 :javascript
   $(function() {
     $('#sharry').sharry();
+    $('#sharryArchives').sharryArchives();
   });
 
 --- name:content pipeline:jade
@@ -21,13 +22,14 @@ assetGroups: sharry.blueimp.fileupload
     small Safely share files
 
 .row
-  .span8
+  .span7
     :markdown
       Use the _Add files..._ button to select files from your hard disk, or just drag&drop them on this page!
 
     #sharry
-  .span4
-    p.alert.alert-info Browse your uploads.
+  .span5
+    h3 Your Archives
+    #sharryArchives
 
 -# - setAttribute("includeJs", Some(false))
 -# =include("_sharry.jade")

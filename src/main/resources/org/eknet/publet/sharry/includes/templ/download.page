@@ -13,10 +13,10 @@ assetGroups: sharry.blueimp.fileupload
 
 .well
   h2 Download
-  p Give the correct password for this download. If the password is wrong, you'll receive a file anyways, but it will be empty.
   form(action="actions/download.zip" method="post")
     label Password:
     input.input-xlarge(type="password" name="password" required="required")
+    span.help-block Supply the correct password for this download. If the password is wrong, you'll receive a file anyways, but it will be empty.
     input(type="hidden" name="filename" value={ PubletWebContext.param("f").getOrElse("") })
     br/
     button.btn.btn-primary(href="#" type="submit") Download

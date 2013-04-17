@@ -29,7 +29,7 @@ import org.eknet.publet.vfs.util.ByteSize
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 12.02.13 00:31
  */
-class SharryImpl(folder: Path, maxSize: Long) extends Sharry with Logging {
+class SharryImpl(folder: Path, val folderSizeLimit: Long) extends Sharry with Logging {
 
   folder.ensureDirectories()
 
@@ -42,8 +42,8 @@ class SharryImpl(folder: Path, maxSize: Long) extends Sharry with Logging {
   def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]) = {
     require(owner != null && !owner.isEmpty, "Owner is required")
     require(password != null && password.length > 0, "password is required")
-    if (getFolderSize >= maxSize) {
-      Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(maxSize) +" exceeded."))
+    if (folderSize >= folderSizeLimit) {
+      Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(folderSizeLimit) +" exceeded."))
     } else {
       val zip = FileIO.zipDir(FileIO.store(files))
       val checksum = createMd5(zip.getInput())
@@ -100,7 +100,7 @@ class SharryImpl(folder: Path, maxSize: Long) extends Sharry with Logging {
     counter.get()
   }
 
-  def getFolderSize = {
+  def folderSize = {
     val size = new AtomicLong(0)
     folder.visitFiles(f => { size.addAndGet(f.fileSize); FileVisitResult.CONTINUE })
     size.get()

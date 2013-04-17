@@ -20,6 +20,7 @@ import org.eknet.publet.quartz.QuartzJob
 import org.quartz.JobExecutionContext
 import grizzled.slf4j.Logging
 import org.eknet.publet.sharry.lib.FileName
+import org.eknet.publet.sharry.SharryService.ArchiveInfo
 
 /**
  *
@@ -35,4 +36,6 @@ class FileDeleteJob(sharry: SharryService) extends QuartzJob with Logging {
       info("Removed "+ nofiles +" shared files")
     }
   }
+
+  implicit def toFilter(f: FileName => Boolean): ArchiveInfo => Boolean = ai => f(ai.archive)
 }

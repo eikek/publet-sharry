@@ -30,9 +30,11 @@ trait SharryService {
 
   def decryptFile(name: FileName, password: String, out: OutputStream)
 
-  def removeFiles(filter: FileName => Boolean): Int
+  def removeFiles(filter: ArchiveInfo => Boolean): Int
 
   def findArchive(name: String): Option[ArchiveInfo]
+
+  def listArchives: Iterable[ArchiveInfo]
 }
 
 object SharryService {

@@ -19,13 +19,14 @@ package org.eknet.publet.sharry
 import org.eknet.publet.sharry.lib.{FileName, Sharry, SharryImpl}
 import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
-import java.nio.file.Path
+import java.nio.file.{Files, Path}
 import org.eknet.publet.ext.graphdb.{BlueprintGraph, GraphDb}
 import org.eknet.publet.sharry.SharryService.{ArchiveInfo, AddResponse, AddRequest}
 import java.security.SecureRandom
 import com.tinkerpop.blueprints.Vertex
 import java.util.UUID
 import java.io.OutputStream
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -56,7 +57,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     }
     def createResponse(req: AddRequest, fn: FileName) = AddResponse(
       archive = fn,
-      filename = req.filename.getOrElse(fn.checksum+"."+fn.ext),
+      filename = req.filename.getOrElse(fn.checksum.take(10)+"."+fn.ext),
       password = req.password,
       id = randomId(10)
     )
@@ -85,7 +86,17 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     }
   }
 
-  def removeFiles(filter: (FileName) => Boolean) = sharry.removeFiles(filter)
+  def removeFiles(filter: ArchiveInfo => Boolean) = {
+    val counter = new AtomicInteger(0)
+    listArchives.withFilter(filter).foreach {ai =>
+      sharry.lookupFile(ai.archive).map(f => Files.deleteIfExists(f))
+      deleteNode(ai.id)
+      counter.incrementAndGet()
+    }
+    counter.get()
+  }
+
+  def listArchives = sharry.listFiles.map(_.fullName).flatMap(findArchive)
 
   private def saveResponse(resp: AddResponse) {
     db.withTx { g:BlueprintGraph =>
@@ -93,6 +104,17 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       v.setProperty(filenameProp, resp.archive.fullName)
       v.setProperty(uniqueIdProp, resp.id)
       v.setProperty("givenName", resp.filename)
+    }
+  }
+
+  private def deleteNode(id: String): Option[FileName] = {
+    import collection.JavaConversions._
+    db.withTx { g: BlueprintGraph =>
+      g.getVertices(uniqueIdProp, id).headOption.map { v =>
+        val fn = FileName(v.getProperty(filenameProp).asInstanceOf[String])
+        g.removeVertex(v)
+        fn
+      }
     }
   }
 

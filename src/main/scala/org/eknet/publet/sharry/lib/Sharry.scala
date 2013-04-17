@@ -88,6 +88,8 @@ trait Sharry {
    *
    * @return
    */
-  def getFolderSize: Long
+  def folderSize: Long
+
+  def folderSizeLimit: Long
 
 }

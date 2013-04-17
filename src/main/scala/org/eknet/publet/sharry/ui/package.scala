@@ -22,6 +22,10 @@ import org.eknet.publet.ext.{MailSupport, MailSessionFactory}
 import org.eknet.publet.web.Config
 import com.google.common.base.Splitter
 import java.security.SecureRandom
+import org.eknet.publet.sharry.lib.FileName
+import org.eknet.publet.vfs.util.ByteSize
+import java.text.DateFormat
+import org.eknet.publet.sharry.SharryService.{AddResponse, ArchiveInfo}
 
 /**
  *
@@ -65,6 +69,30 @@ package object ui extends MailSupport {
       }
     }
   }
+
+  def fileName2Map(name: FileName) = Map(
+    "size" -> name.size,
+    "sizeString" -> ByteSize.bytes.normalizeString(name.size),
+    "created" -> name.time,
+    "validUntil" -> name.until,
+    "validUntilDate" -> (if (name.until<=0) "Forever" else DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale).format(new java.util.Date(name.until))),
+    "checksum" -> name.checksum,
+    "owner" -> name.owner,
+    "name" -> name.fullName
+  )
+
+  def archiveInfo2Map(ai: ArchiveInfo) = fileName2Map(ai.archive) ++ Map(
+    "id" -> ai.id,
+    "givenName" -> ai.name,
+    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+ai.id)
+  )
+
+  def addResponse2Map(resp: AddResponse) = fileName2Map(resp.archive) ++ Map(
+    "id" -> resp.id,
+    "givenName" -> resp.filename,
+    "password" -> new String(resp.password),
+    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+resp.id)
+  )
 
   def mailSession = PubletWeb.instance[MailSessionFactory].get
   def config = PubletWeb.instance[Config].get

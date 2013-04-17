@@ -47,20 +47,7 @@ class UploadHandler extends ScalaScript with Logging {
     resp.fold(failure, success)
   }
 
-  private def success(resp: AddResponse) = makeJson(Map(
-    "success" -> true,
-    "password" -> new String(resp.password),
-    "size" -> resp.archive.size,
-    "sizeString" -> ByteSize.bytes.normalizeString(resp.archive.size),
-    "created" -> resp.archive.time,
-    "validUntil" -> resp.archive.until,
-    "validUntilDate" -> (if (resp.archive.until<=0) "Forever" else DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale).format(new java.util.Date(resp.archive.until))),
-    "checksum" -> resp.archive.checksum,
-    "owner" -> resp.archive.owner,
-    "name" -> resp.archive.fullName,
-    "givenName" -> resp.filename,
-    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+resp.id)
-  ))
+  private def success(resp: AddResponse) = makeJson(addResponse2Map(resp))
 
   private def failure(exc: Exception) = {
     error("Error adding files!", exc)

@@ -28,7 +28,7 @@ import org.quartz.{DateBuilder, Scheduler}
 import org.eknet.publet.quartz.QuartzDsl
 import org.quartz.DateBuilder.IntervalUnit
 import org.eknet.publet.web.scripts.WebScriptResource
-import org.eknet.publet.sharry.ui.{MailSender, DownloadHandler, UploadHandler}
+import org.eknet.publet.sharry.ui.{ArchiveManage, MailSender, DownloadHandler, UploadHandler}
 import org.eknet.publet.webeditor.{Assets => EditorAssets}
 
 @Singleton
@@ -42,6 +42,7 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
 
     val sharryAssets = Group("publet-sharry.assets")
       .add(resource("js/jquery.sharry.js"))
+      .add(resource("js/jquery.sharry-archives.js"))
       .add(resource("js/sharry.startup.js"))
       .require(DefaultLayout.Assets.bootstrap.name, DefaultLayout.Assets.jquery.name, DefaultLayout.Assets.mustache.name)
 
@@ -60,6 +61,7 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
     val scripts = new MapContainer
     scripts.addResource(new WebScriptResource("upload.json".rn, new UploadHandler))
     scripts.addResource(new WebScriptResource("sharemail.json".rn, new MailSender))
+    scripts.addResource(new WebScriptResource("listarchives.json".rn, new ArchiveManage))
     scripts.addResource(new DownloadHandler("download".rn))
     publet.mountManager.mount(Path("/sharry/actions"), scripts)
   }
