@@ -140,7 +140,6 @@
 
   var uploadFormTemplate =
       '<form class="fileuploadForm form-horizontal" action="{{ uploadUrl }}" method="POST" enctype="multipart/form-data">'+
-       ' <p>Use the <em>Add files...</em> button to select files from your hard disk, or just drag&drop them on this page!</p>' +
       '  <div class="fileupload-buttonbar">'+
       '    <span class="btn btn-primary fileinput-button">'+
       '      <i class="icon-plus icon-white"></i>'+
@@ -162,8 +161,8 @@
       '    <div class="control-group">' +
       '      <label class="control-label">Password</label>'+
       '      <div class="controls">' +
-      '        <input type="password" name="password" required="required">'+
-      '        <span class="help-block">You can specify a password that is used to encrypt the files. If it is left empty, there is a random one generated for you.</span>' +
+      '        <input type="password" name="password" placeholder="optional password">'+
+      '        <span class="help-inline">or a random one is used</span>' +
       '      </div>'+
       '    </div>'+
       '    <div class="control-group">'+
@@ -180,6 +179,13 @@
       '          <option value="0">Forever</option>'+
       '        </select>'+
       '      </div>'+
+      '    </div>' +
+      '    <div class="control-group">' +
+      '      <label class="control-label">Name</label>' +
+      '      <div class="controls">' +
+      '        <input type="text" placeholder="optional file name" name="name">' +
+      '        <span class="help-inline">or a random one is created</span> ' +
+      '      </div>' +
       '    </div>'+
       '  </div>'+
       '  <div>'+
@@ -222,7 +228,7 @@
       '</script>';
 
   var uploadOkTemplate = '<div class="well">' +
-      '<h2>Download ready!</h2><br/>'+
+      '<h2>Download "{{givenName}}" ready!</h2><br/>'+
       '<p><a href="{{url}}">{{url}} ({{sizeString}})</a> <br/></p>'+
       '<p>Valid until: {{validUntilDate}}</p>'+
       '<p>Password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +
@@ -234,8 +240,9 @@
       '<form action="{{shareMailUrl}}">' +
       '  <div class="mailFeedback"></div>'+
       '  <fieldset>'+
-      '  <label>Receivers <small style="color:#666;">(list of emails, for example: me@gmail.com, john.doe@hotmail.com)</small></label>'+
-      '  <input class="input-block-level" type="text" name="receivers" required="required"/> '+
+      '  <label>Receivers</label>'+
+      '  <input class="input-block-level" type="text" name="receivers" required="required"/> ' +
+      '  <span class="help-block">list of emails, for example: me@gmail.com, john.doe@hotmail.com</span> '+
       '  <label>Subject</label>' +
       '  <input class="input-block-level" type="text" name="subject"/>' +
       '  <label>Message</label>'+
@@ -245,7 +252,7 @@
       '</form>';
 
   var emailTextTemplate = "Hi,\n\n" +
-      "The download ({{sizeString}}) is ready:\n\n" +
+      "The download '{{givenName}}' ({{sizeString}}) is ready:\n\n" +
       "{{&url}}\n\n" +
       "Password: {{password}}\n" +
       "The link is valid until {{validUntilDate}}.\n\n"+

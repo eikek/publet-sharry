@@ -1,37 +1,37 @@
-package org.eknet.publet.sharry
+package org.eknet.publet.sharry.lib
 
-import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
+import java.io.{IOException, ByteArrayOutputStream}
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
-import java.util.zip.ZipInputStream
-import scala.collection.mutable.ListBuffer
 import java.util.concurrent.atomic.AtomicInteger
-import java.io.{IOException, ByteArrayOutputStream}
+import java.util.zip.ZipInputStream
+import org.eknet.publet.sharry.lib
+import org.scalatest.FunSuite
+import org.scalatest.matchers.ShouldMatchers
+import scala.collection.mutable.ListBuffer
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 28.03.13 23:35
  */
-class SharryServiceSuite extends FunSuite with ShouldMatchers {
+class SharrySuite extends FunSuite with ShouldMatchers {
 
-  import lib._
   import Timeout._
 
   val textfile1 = new Entry {
     def name = "textfile"
-    def inputStream = classOf[SharryServiceSuite].getResourceAsStream("/textfile1.txt")
+    def inputStream = classOf[SharrySuite].getResourceAsStream("/textfile1.txt")
   }
   val textfile2 = new Entry {
     def name = "textfile2.txt"
-    def inputStream = classOf[SharryServiceSuite].getResourceAsStream("/textfile2.txt")
+    def inputStream = classOf[SharrySuite].getResourceAsStream("/textfile2.txt")
   }
 
   test ("valid encrypting/decrypting") {
     val testfolder = Paths.get("target", "test-crypt")
     testfolder.ensureDirectories()
     testfolder.deleteTree()
-    val sharry = new SharryServiceImpl(testfolder, 1)
+    val sharry = new SharryImpl(testfolder, 1)
     val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw".toCharArray, Some(2.seconds))
 
     val name = result.fold(e => throw e, identity)

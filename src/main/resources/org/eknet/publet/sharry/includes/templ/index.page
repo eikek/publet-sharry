@@ -22,6 +22,9 @@ assetGroups: sharry.blueimp.fileupload
 
 .row
   .span8
+    :markdown
+      Use the _Add files..._ button to select files from your hard disk, or just drag&drop them on this page!
+
     #sharry
   .span4
     p.alert.alert-info Browse your uploads.

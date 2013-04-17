@@ -37,20 +37,20 @@ class DownloadHandler(val name: ResourceName) extends ContentResource with Custo
     val util = new ReqUtils(req)
     val password = util.param("password").filter(!_.isEmpty)
     val filename = util.param("filename").filter(!_.isEmpty)
-    (password, filename) match {
-      case (Some(pw), Some(file)) => {
-        val fn = FileName(file)
+    val archiveinfo = filename.flatMap(f => sharry.findArchive(f))
+    (password, filename, archiveinfo) match {
+      case (Some(pw), Some(file), Some(ai)) => {
+        val fn = ai.archive
         resp.setContentType(ContentType.zip.mimeString)
         resp.setContentLength(fn.size.toInt)
-        resp.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+fn.checksum+"."+fn.ext)
+        resp.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+convertName(ai.name)+"."+fn.ext)
 
         val os = resp.getOutputStream
         try {
           sharry.decryptFile(fn, pw, os)
-        }catch {
+        } catch {
           case e: Exception => {
             error("Error getting file!", e)
-            //          resp.sendError(HttpServletResponse.SC_BAD_REQUEST)
           }
         }
       }
@@ -58,4 +58,5 @@ class DownloadHandler(val name: ResourceName) extends ContentResource with Custo
     }
   }
 
+  private def convertName(str: String) = str.replaceAll("\\s+", "_").replaceAll("[^\\w\\._]+", "-")
 }

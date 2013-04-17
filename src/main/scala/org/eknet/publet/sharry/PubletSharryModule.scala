@@ -19,11 +19,11 @@ package org.eknet.publet.sharry
 import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.publet.web.Config
 import java.nio.file.Path
-import com.google.inject.Provides
+import com.google.inject.{Singleton, Provides}
 import org.eknet.publet.vfs.util.ByteSize
 import com.google.inject.name.Named
 import grizzled.slf4j.Logging
-import org.eknet.publet.sharry.lib.{SharryServiceImpl, SharryService}
+import org.eknet.publet.ext.graphdb.GraphDbProvider
 
 class PubletSharryModule extends AbstractPubletModule with PubletBinding with PubletModule with Logging {
 
@@ -41,6 +41,11 @@ class PubletSharryModule extends AbstractPubletModule with PubletBinding with Pu
   def bindFolderSize(config: Config): Long = config("sharry.maxFolderSize") match {
     case Some(x) => parseSize(x).getOrElse(defaultFolderSize)
     case None => defaultFolderSize
+  }
+
+  @Provides@Singleton@Named("sharry-db")
+  def sharryDb(dbprovider: GraphDbProvider) = {
+    dbprovider.getDatabase("sharry-db")
   }
 
   private[this] def parseSize(size: String) = {

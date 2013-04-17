@@ -23,7 +23,7 @@ import java.nio.file.Path
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 11.02.13 22:42
  */
-trait SharryService {
+trait Sharry {
 
   /**
    * Adds the given files by zipping them into one archive and encrypting this

@@ -16,8 +16,6 @@
 
 package org.eknet.publet.sharry.lib
 
-import com.google.inject.name.Named
-import com.google.inject.{Singleton, Inject}
 import grizzled.slf4j.Logging
 import java.io.OutputStream
 import java.nio.file.DirectoryStream.Filter
@@ -31,8 +29,7 @@ import org.eknet.publet.vfs.util.ByteSize
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 12.02.13 00:31
  */
-@Singleton
-class SharryServiceImpl @Inject() (@Named("sharryFolder") folder: Path, @Named("maxSharryFolderSize") maxSize: Long) extends SharryService with Logging {
+class SharryImpl(folder: Path, maxSize: Long) extends Sharry with Logging {
 
   folder.ensureDirectories()
 

@@ -19,7 +19,7 @@ package org.eknet.publet.sharry
 import org.eknet.publet.quartz.QuartzJob
 import org.quartz.JobExecutionContext
 import grizzled.slf4j.Logging
-import org.eknet.publet.sharry.lib.{SharryService, FileName}
+import org.eknet.publet.sharry.lib.FileName
 
 /**
  *

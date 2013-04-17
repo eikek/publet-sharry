@@ -24,6 +24,7 @@ import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.sharry.lib.{Entry, FileName}
 import java.text.DateFormat
 import org.apache.commons.fileupload.FileItem
+import org.eknet.publet.sharry.SharryService.{AddResponse, AddRequest}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -34,25 +35,31 @@ class UploadHandler extends ScalaScript with Logging {
   def serve() = {
     import org.eknet.publet.sharry.lib.Timeout._
     val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
-    val password = param("password").map(_.toCharArray).getOrElse(randomPassword(18))
     val timeout = longParam("timeout").filter(_ > 0).map(_.days)
-    val name = sharry.addFiles(uploads, Security.username, password, timeout)
-
-    name.fold(failure, success(password)_)
+    val req = AddRequest(
+      files = uploads,
+      password = param("password").map(_.toCharArray).getOrElse(Array()),
+      owner = Security.username,
+      timeout = timeout,
+      filename = param("name")
+    )
+    val resp = sharry.addFiles(req)
+    resp.fold(failure, success)
   }
 
-  private def success(password: Array[Char])(name: FileName) = makeJson(Map(
+  private def success(resp: AddResponse) = makeJson(Map(
     "success" -> true,
-    "password" -> new String(password),
-    "size" -> name.size,
-    "sizeString" -> ByteSize.bytes.normalizeString(name.size),
-    "created" -> name.time,
-    "validUntil" -> name.until,
-    "validUntilDate" -> (if (name.until<=0) "Forever" else DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale).format(new java.util.Date(name.until))),
-    "checksum" -> name.checksum,
-    "owner" -> name.owner,
-    "name" -> name.fullName,
-    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+name.fullName)
+    "password" -> new String(resp.password),
+    "size" -> resp.archive.size,
+    "sizeString" -> ByteSize.bytes.normalizeString(resp.archive.size),
+    "created" -> resp.archive.time,
+    "validUntil" -> resp.archive.until,
+    "validUntilDate" -> (if (resp.archive.until<=0) "Forever" else DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale).format(new java.util.Date(resp.archive.until))),
+    "checksum" -> resp.archive.checksum,
+    "owner" -> resp.archive.owner,
+    "name" -> resp.archive.fullName,
+    "givenName" -> resp.filename,
+    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+resp.id)
   ))
 
   private def failure(exc: Exception) = {
