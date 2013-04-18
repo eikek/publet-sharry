@@ -24,7 +24,9 @@
   var tableTemplate =
       '<div>' +
       '<ul class="breadcrumb">' +
-      '  <li class="active">{{count}} items / {{sizeString}}</li>' +
+      '  <li class="active">{{count}} items <span class="divider">/</span></li>' +
+      '  <li class="active">{{sizeString}}</li>' +
+      '  <li class="active pull-right refreshListButton"><a class="btn btn-mini"><i class="icon-refresh"></i></a></li>' +
       '</ul> '+
       '<table class="table table-condensed table-hover">' +
       '<thead>' +
@@ -42,7 +44,6 @@
       '      <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">Action <span class="caret"></span></a> ' +
       '      <ul class="dropdown-menu">' +
       '        <li><a href="{{url}}">Download</i></a></li> ' +
-      '        <li><a href="#">Manage Links</a></li>' +
       '        <li><a href="#">Delete</a></li> ' +
       '      </ul>' +
       '    </div>' +
@@ -56,8 +57,13 @@
       '</div>';
 
   function render($this, settings) {
+    $this.mask();
     $.get(settings.listUrl, { "do": "list" }, function(data) {
+      $this.unmask();
       $this.html(Mustache.render(tableTemplate, data));
+      $this.find('.refreshListButton').click(function(e) {
+        render($this, settings);
+      });
     });
   }
 

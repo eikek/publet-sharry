@@ -1,6 +1,6 @@
 ---
 title: Publet Sharry
-assetGroups: sharry.blueimp.fileupload
+assetGroups: publet-sharry.assets
 
 --- name:head pipeline:jade
 :css

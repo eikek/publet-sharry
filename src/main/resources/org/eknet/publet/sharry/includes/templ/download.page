@@ -1,10 +1,12 @@
 ---
 title: Publet Sharry
-assetGroups: sharry.blueimp.fileupload
+assetGroups: publet-sharry.assets
 
 --- name:head pipeline:jade
 
 --- name:content pipeline:jade
+- import org.eknet.publet.sharry._
+- val id: String = PubletWebContext.attr(idKey).getOrElse("")
 
 .page-header
   h1
@@ -13,10 +15,10 @@ assetGroups: sharry.blueimp.fileupload
 
 .well
   h2 Download
-  form(action="actions/download.zip" method="post")
+  form(action="../actions/download.zip" method="post")
     label Password:
     input.input-xlarge(type="password" name="password" required="required")
     span.help-block Supply the correct password for this download. If the password is wrong, you'll receive a file anyways, but it will be empty.
-    input(type="hidden" name="filename" value={ PubletWebContext.param("f").getOrElse("") })
+    input(type="hidden" name="filename" value={ id })
     br/
     button.btn.btn-primary(href="#" type="submit") Download

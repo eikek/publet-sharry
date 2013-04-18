@@ -30,9 +30,10 @@ import org.quartz.DateBuilder.IntervalUnit
 import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.sharry.ui.{ArchiveManage, MailSender, DownloadHandler, UploadHandler}
 import org.eknet.publet.webeditor.{Assets => EditorAssets}
+import com.google.inject.name.Named
 
 @Singleton
-class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, scheduler: Scheduler) extends AssetCollection with QuartzDsl {
+class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, scheduler: Scheduler, @Named("sharryPath") path: Path) extends AssetCollection with QuartzDsl {
 
   override def classPathBase = "/org/eknet/publet/sharry/includes"
 
@@ -44,26 +45,21 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
       .add(resource("js/jquery.sharry.js"))
       .add(resource("js/jquery.sharry-archives.js"))
       .add(resource("js/sharry.startup.js"))
-      .require(DefaultLayout.Assets.bootstrap.name, DefaultLayout.Assets.jquery.name, DefaultLayout.Assets.mustache.name)
+      .require(DefaultLayout.Assets.bootstrap.name)
+      .require(DefaultLayout.Assets.jquery.name)
+      .require(DefaultLayout.Assets.mustache.name, Assets.blueimpFileUpload.name)
 
-    val sharryAssetsConfigured = Group("publet-sharry.assets.configured")
-      .forPath("/sharry/**")
-      .use(sharryAssets.name)
-
-    assetMgr setup (sharryAssets, sharryAssetsConfigured, Assets.blueimpFileUpload)
+    assetMgr setup (sharryAssets, Assets.blueimpFileUpload)
    
-    assetMgr setup
-      Group("default").use(sharryAssetsConfigured.name)
-
     val cont = new ClasspathContainer(base = "/org/eknet/publet/sharry/includes/templ")
-    publet.mountManager.mount(Path("/sharry"), cont)
+    publet.mountManager.mount(path, cont)
 
     val scripts = new MapContainer
     scripts.addResource(new WebScriptResource("upload.json".rn, new UploadHandler))
     scripts.addResource(new WebScriptResource("sharemail.json".rn, new MailSender))
     scripts.addResource(new WebScriptResource("listarchives.json".rn, new ArchiveManage))
     scripts.addResource(new DownloadHandler("download".rn))
-    publet.mountManager.mount(Path("/sharry/actions"), scripts)
+    publet.mountManager.mount(path / "actions", scripts)
   }
 
   @Subscribe

@@ -26,6 +26,7 @@ import org.eknet.publet.sharry.lib.FileName
 import org.eknet.publet.vfs.util.ByteSize
 import java.text.DateFormat
 import org.eknet.publet.sharry.SharryService.{AddResponse, ArchiveInfo}
+import org.eknet.publet.vfs.Path
 
 /**
  *
@@ -84,17 +85,18 @@ package object ui extends MailSupport {
   def archiveInfo2Map(ai: ArchiveInfo) = fileName2Map(ai.archive) ++ Map(
     "id" -> ai.id,
     "givenName" -> ai.name,
-    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+ai.id)
+    "url" -> PubletWebContext.urlOf(sharryPath / "download" / ai.id)
   )
 
   def addResponse2Map(resp: AddResponse) = fileName2Map(resp.archive) ++ Map(
     "id" -> resp.id,
     "givenName" -> resp.filename,
     "password" -> new String(resp.password),
-    "url" -> PubletWebContext.urlOf("/sharry/download.html?f="+resp.id)
+    "url" -> PubletWebContext.urlOf(sharryPath / "download" / resp.id)
   )
 
   def mailSession = PubletWeb.instance[MailSessionFactory].get
   def config = PubletWeb.instance[Config].get
 
+  def sharryPath = PubletWeb.instance[Path].named("sharryPath")
 }

@@ -18,12 +18,14 @@ package org.eknet.publet.sharry
 
 import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.publet.web.Config
-import java.nio.file.Path
+import java.nio.file.{Path => JPath}
 import com.google.inject.{Singleton, Provides}
 import org.eknet.publet.vfs.util.ByteSize
 import com.google.inject.name.Named
 import grizzled.slf4j.Logging
 import org.eknet.publet.ext.graphdb.GraphDbProvider
+import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.util.Key
 
 class PubletSharryModule extends AbstractPubletModule with PubletBinding with PubletModule with Logging {
 
@@ -32,10 +34,14 @@ class PubletSharryModule extends AbstractPubletModule with PubletBinding with Pu
   def configure() {
     bind[PubletSharrySetup].asEagerSingleton()
     bind[SharryService].to[SharryServiceImpl]
+    bindRequestHandler.add[SharryDownloadFilter]
   }
 
+  @Provides@Named("sharryPath")
+  def bindSharryPath(config: Config) = Path(config("sharry.path").getOrElse("/sharry"))
+
   @Provides@Named("sharryFolder")
-  def bindFolder(config: Config): Path = config.workDir("sharry-folder").toPath
+  def bindFolder(config: Config): JPath = config.workDir("sharry-folder").toPath
 
   @Provides@Named("maxSharryFolderSize")
   def bindFolderSize(config: Config): Long = config("sharry.maxFolderSize") match {
