@@ -20,6 +20,7 @@ import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.sharry.SharryService.ArchiveInfo
 import org.eknet.publet.vfs.util.ByteSize
+import org.eknet.publet.sharry.lib.FileName
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -29,6 +30,14 @@ class ArchiveManage extends ScalaScript {
 
   def serve() = {
     Security.checkAuthenticated()
+    param("do") match {
+      case Some("list") => listArchives
+      case Some("removeArchive") => deleteArchive()
+      case _ => makeJson(Map("success" -> false, "message" -> "Unknown command."))
+    }
+  }
+
+  def listArchives = {
     val currentOwner = (ai: ArchiveInfo) => ai.archive.owner == Security.username
     val list = sharry.listArchives.filter(currentOwner).toList
     val size = list.map(_.archive.size).foldLeft(0L)((s,t) => s+t)
@@ -38,5 +47,15 @@ class ArchiveManage extends ScalaScript {
       "sizeString" -> ByteSize.bytes.normalizeString(size),
       "count" -> list.size
     ))
+  }
+
+  def deleteArchive() = {
+    param("archive").flatMap(FileName.tryParse) match {
+      case Some(fn) => {
+        sharry.removeFiles(_.archive == fn)
+        makeJson(Map("success" -> true, "message" -> "Archive removed."))
+      }
+      case _ => makeJson(Map("success" -> false, "message" -> "Cannot remove archive."))
+    }
   }
 }

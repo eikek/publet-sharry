@@ -7,11 +7,14 @@ assetGroups: publet-sharry.assets
   .loadmask {
     background: #eee;
   }
+  .tab-pane {
+    padding-bottom: 60px;
+  }
 :javascript
   $(function() {
     $('#sharry').sharry();
     $('#sharryArchives').sharryArchives();
-    $('#sharryTest').sharryAlias();
+    $('#sharryAliases').sharryAlias();
   });
 
 --- name:content pipeline:jade
@@ -23,7 +26,14 @@ assetGroups: publet-sharry.assets
     small Safely share files
 
 .row
-  .span7
+  .span3
+    ul.nav.nav-tabs.nav-stacked
+      li.active
+        a(href="#upload" data-toggle="tab") Upload
+      li
+        a(href="#yourArchives" data-toggle="tab") Your Archives
+      li
+        a(href="#yourAliases" data-toggle="tab") Your Aliases
     .accordion#howitworks
       .accordion-group
         .accordion-heading
@@ -32,11 +42,27 @@ assetGroups: publet-sharry.assets
         #howitworksText.accordion-body.collapse
           .accordion-inner
             =include("howitworks.md")
-    :markdown
-      Use the _Add files..._ button to select files from your hard disk, or just drag&drop them on this page!
 
-    #sharry
-    #sharryTest
-  .span5
-    h3 Your Archives
-    #sharryArchives
+  .span9
+    .tab-content
+      .tab-pane.active#upload
+        h2 Upload
+        :markdown
+          Use the _Add files..._ button to select files from your hard disk, or just drag&drop them on this page!
+
+        #sharry
+      .tab-pane#yourAliases
+        h2 Your Aliases
+        :markdown
+          Here you can manage the sites that other people can use to send files to you. All
+          files that are uploaded using the alias pages are for you. All those pages are open
+          to everyone. You can define standard timeouts and passwords to use. If you receive
+          spam, you can delete or disable the alias.
+
+        #sharryAliases
+      .tab-pane#yourArchives
+        h2 Your Archives
+        :markdown
+          This is the list of all files uploaded by you or for you.
+
+        #sharryArchives

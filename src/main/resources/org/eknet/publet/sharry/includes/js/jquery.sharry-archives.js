@@ -27,7 +27,8 @@
       '  <li class="active">{{count}} items <span class="divider">/</span></li>' +
       '  <li class="active">{{sizeString}}</li>' +
       '  <li class="active pull-right"><a class="btn btn-mini refreshListButton"><i class="icon-refresh"></i></a></li>' +
-      '</ul> '+
+      '</ul> ' +
+      '<div class="archiveFeedback"></div> '+
       '<table class="table table-condensed table-hover">' +
       '<thead>' +
       '  <tr>' +
@@ -44,7 +45,7 @@
       '      <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">Action <span class="caret"></span></a> ' +
       '      <ul class="dropdown-menu">' +
       '        <li><a href="{{url}}">Download</i></a></li> ' +
-      '        <li><a href="#">Delete</a></li> ' +
+      '        <li><a href="#" class="removeArchiveButton" data-archive="{{name}}">Delete</a></li> ' +
       '      </ul>' +
       '    </div>' +
       '  </td>' +
@@ -63,6 +64,19 @@
       $this.html(Mustache.render(tableTemplate, data));
       $this.find('.refreshListButton').click(function(e) {
         render($this, settings);
+      });
+      $this.find('.removeArchiveButton').click(function(e) {
+        var file = $(e.target).attr('data-archive');
+        $.post(settings.listUrl, { "do": "removeArchive", "archive": file }, function(data) {
+          if (data.success === false) {
+            $this.find('.archiveFeedback').feedbackMessage({
+              message: data.message,
+              cssClass: 'alert alert-error'
+            });
+          } else {
+            render($this, settings);
+          }
+        });
       });
     });
   }

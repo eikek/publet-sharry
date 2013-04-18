@@ -48,6 +48,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
   private val uniqueIdProp = "sharry-unique-id"
   private val loginProp = "sharry-username"
   private val aliasProp = "sharry-username-alias"
+  private val givenName = "sharry-givenName"
 
   for (prop <- List(filenameProp, uniqueIdProp, loginProp, aliasProp)) {
     if (!db.graph.getIndexedKeys(classOf[Vertex]).contains(prop)) {
@@ -78,14 +79,13 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
   }
 
   def findArchive(name: String): Option[ArchiveInfo] = {
-    import collection.JavaConversions._
     val prop = FileName.tryParse(name).map(_ => filenameProp).getOrElse(uniqueIdProp)
-    db.withTx { g: BlueprintGraph =>
-      g.getVertices(prop, name).headOption.map { v =>
-        ArchiveInfo (
-          archive = FileName(v.getProperty(filenameProp).asInstanceOf[String]),
-          name = v.getProperty("givenName").asInstanceOf[String],
-          id = v.getProperty(uniqueIdProp).asInstanceOf[String]
+    withTx {
+      singleVertex(prop := name) map { v =>
+        ArchiveInfo(
+          archive = FileName(v.get[String](filenameProp).get),
+          name = v.get[String](givenName).get,
+          id = v.get[String](uniqueIdProp).get
         )
       }
     }
@@ -108,7 +108,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       val v = newVertex
       v(filenameProp) = resp.archive.fullName
       v(uniqueIdProp) = resp.id
-      v("sharry-givenName") = resp.filename
+      v(givenName) = resp.filename
     }
   }
 

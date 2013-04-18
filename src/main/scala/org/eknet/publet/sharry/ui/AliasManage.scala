@@ -83,8 +83,8 @@ class AliasManage extends ScalaScript {
   def listAliases = {
     val login = Security.username
     val list = sharry.listAliases(login)
-    val activeCount = list.foldLeft(0)((s,t) => if (t.enabled) s+1 else 0)
-    val inactiveCount = list.foldLeft(0)((s,t) => if (!t.enabled) s+1 else 0)
+    val activeCount = list.foldLeft(0)((s,t) => if (t.enabled) s+1 else s)
+    val inactiveCount = list.size - activeCount
     makeJson(Map(
       "aliases" -> list.map(aliasToMap).toList,
       "success" -> true,

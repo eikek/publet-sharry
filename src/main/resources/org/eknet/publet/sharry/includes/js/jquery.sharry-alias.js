@@ -93,7 +93,7 @@
       '      </label> '+
       '    </div>' +
       '    <div class="modal-footer">' +
-      '      <a href="#" class="btn">Cancel</a> ' +
+      '      <a class="btn" data-dismiss="modal">Cancel</a> ' +
       '      <button type="submit" class="btn btn-primary">Save</button> ' +
       '    </div> '+
       '  </form> ' +
