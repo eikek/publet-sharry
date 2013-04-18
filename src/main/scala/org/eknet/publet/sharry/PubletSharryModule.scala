@@ -35,6 +35,7 @@ class PubletSharryModule extends AbstractPubletModule with PubletBinding with Pu
     bind[PubletSharrySetup].asEagerSingleton()
     bind[SharryService].to[SharryServiceImpl]
     bindRequestHandler.add[SharryDownloadFilter]
+    bindRequestHandler.add[SharryUserUploadFilter]
   }
 
   @Provides@Named("sharryPath")

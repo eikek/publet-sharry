@@ -17,7 +17,7 @@
 package org.eknet.publet.sharry
 
 import org.eknet.publet.sharry.lib.{FileName, Timeout, Entry}
-import org.eknet.publet.sharry.SharryService.{ArchiveInfo, AddResponse, AddRequest}
+import org.eknet.publet.sharry.SharryService.{Alias, ArchiveInfo, AddResponse, AddRequest}
 import java.io.OutputStream
 
 /**
@@ -35,6 +35,16 @@ trait SharryService {
   def findArchive(name: String): Option[ArchiveInfo]
 
   def listArchives: Iterable[ArchiveInfo]
+
+  def updateAlias(login: String, alias: Alias)
+
+  def removeAlias(alias: String)
+
+  def findUser(alias: String): Option[String]
+
+  def findAlias(alias: String): Option[Alias]
+
+  def listAliases(login: String): Iterable[Alias]
 }
 
 object SharryService {
@@ -49,4 +59,10 @@ object SharryService {
   case class AddResponse(id: String, archive: FileName, filename: String, password: Array[Char])
 
   case class ArchiveInfo(archive: FileName, name: String, id: String)
+
+  case class Alias(name: String,
+                   enabled: Boolean = true,
+                   defaultPassword: Array[Char] = Array(),
+                   timeout: Option[Timeout] = None,
+                   notification: Boolean = true)
 }

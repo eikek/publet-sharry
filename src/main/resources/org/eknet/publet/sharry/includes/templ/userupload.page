@@ -1,0 +1,50 @@
+---
+title: Sharry - User Upload
+assetGroups: publet-sharry.assets
+
+--- name:head pipeline:jade
+- import org.eknet.publet.sharry._
+- val id = PubletWebContext.attr(idKey).getOrElse("")
+:css
+  .loadmask {
+    background: #eee;
+  }
+:&javascript
+  $(function() {
+    $('#userUpload').sharry({
+      forUser: "#{id}"
+    });
+  });
+
+--- name:content pipeline:jade
+- import org.eknet.publet.sharry._
+- val service: SharryService = PubletWeb.instance[SharryService].get
+- val id = PubletWebContext.attr(idKey)
+- val username = id.flatMap(service.findUser)
+
+.page-header
+  h1
+    | »Sharry«
+    small Safely share files
+
+- if (username.isEmpty) {
+  .row
+    .span10.offset1
+      .alert.alert-error
+        :markdown
+          **Bad Request** There is no upload site available.
+
+- } else {
+  .row
+    .span10.offset1
+      .accordion#howitworks
+        .accordion-group
+          .accordion-heading
+            a.accordion-toggle(data-toggle="collapse" data-parent="#howitworks" href="#howitworksText")
+              | Read how it works
+          #howitworksText.accordion-body.collapse
+            .accordion-inner
+              =include("howitworks.md")
+
+      #userUpload
+- }

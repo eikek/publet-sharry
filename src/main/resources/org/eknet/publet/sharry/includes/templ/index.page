@@ -11,6 +11,7 @@ assetGroups: publet-sharry.assets
   $(function() {
     $('#sharry').sharry();
     $('#sharryArchives').sharryArchives();
+    $('#sharryTest').sharryAlias();
   });
 
 --- name:content pipeline:jade
@@ -35,6 +36,7 @@ assetGroups: publet-sharry.assets
       Use the _Add files..._ button to select files from your hard disk, or just drag&drop them on this page!
 
     #sharry
+    #sharryTest
   .span5
     h3 Your Archives
     #sharryArchives

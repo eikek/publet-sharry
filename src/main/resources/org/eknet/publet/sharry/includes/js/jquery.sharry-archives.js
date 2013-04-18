@@ -26,7 +26,7 @@
       '<ul class="breadcrumb">' +
       '  <li class="active">{{count}} items <span class="divider">/</span></li>' +
       '  <li class="active">{{sizeString}}</li>' +
-      '  <li class="active pull-right refreshListButton"><a class="btn btn-mini"><i class="icon-refresh"></i></a></li>' +
+      '  <li class="active pull-right"><a class="btn btn-mini refreshListButton"><i class="icon-refresh"></i></a></li>' +
       '</ul> '+
       '<table class="table table-condensed table-hover">' +
       '<thead>' +

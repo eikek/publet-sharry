@@ -35,7 +35,7 @@ object Version {
   val scala = "2.9.2"
   val servlet = "3.0.1"
   val publet = "1.1.0"
-//  val scue = "0.2.0"
+  val scue = "0.2.0"
 }
 
 object Dependencies {
@@ -48,7 +48,7 @@ object Dependencies {
     "org.eknet.publet" %% "publet-web" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
     "org.eknet.publet" %% "publet-webeditor" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
     "org.eknet.publet" %% "publet-ext" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
-//    "org.eknet.scue" %% "scue" % Version.scue,
+    "org.eknet.scue" %% "scue" % Version.scue,
     "org.eknet.publet" %% "publet-ext" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
     "org.slf4j" % "jcl-over-slf4j" % Version.slf4j,
     "org.scalatest" %% "scalatest" % Version.scalaTest,

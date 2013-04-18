@@ -16,17 +16,18 @@
 
 package org.eknet.publet.sharry
 
-import org.eknet.publet.sharry.lib.{FileName, Sharry, SharryImpl}
+import org.eknet.publet.sharry.lib.{Timeout, FileName, Sharry, SharryImpl}
 import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import java.nio.file.{Files, Path}
 import org.eknet.publet.ext.graphdb.{BlueprintGraph, GraphDb}
-import org.eknet.publet.sharry.SharryService.{ArchiveInfo, AddResponse, AddRequest}
+import org.eknet.publet.sharry.SharryService.{Alias, ArchiveInfo, AddResponse, AddRequest}
 import java.security.SecureRandom
-import com.tinkerpop.blueprints.Vertex
+import com.tinkerpop.blueprints.{Direction, Vertex}
 import java.util.UUID
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicInteger
+import org.eknet.scue.GraphDsl
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -35,16 +36,20 @@ import java.util.concurrent.atomic.AtomicInteger
 @Singleton
 class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
                                    @Named("maxSharryFolderSize") maxSize: Long,
-                                   @Named("sharry-db") db: GraphDb) extends SharryService {
+                                   @Named("sharry-db") db: GraphDb) extends SharryService with GraphDsl {
 
   import SharryServiceImpl.randomPassword
   import SharryServiceImpl.randomId
 
+  private implicit val graph = db.graph
+
   private val sharry: Sharry = new SharryImpl(folder, maxSize)
   private val filenameProp = "sharry-lib-filename"
   private val uniqueIdProp = "sharry-unique-id"
+  private val loginProp = "sharry-username"
+  private val aliasProp = "sharry-username-alias"
 
-  for (prop <- List(filenameProp, uniqueIdProp)) {
+  for (prop <- List(filenameProp, uniqueIdProp, loginProp, aliasProp)) {
     if (!db.graph.getIndexedKeys(classOf[Vertex]).contains(prop)) {
       db.graph.createKeyIndex(prop, classOf[Vertex])
     }
@@ -99,35 +104,89 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
   def listArchives = sharry.listFiles.map(_.fullName).flatMap(findArchive)
 
   private def saveResponse(resp: AddResponse) {
-    db.withTx { g:BlueprintGraph =>
-      val v = g.addVertex()
-      v.setProperty(filenameProp, resp.archive.fullName)
-      v.setProperty(uniqueIdProp, resp.id)
-      v.setProperty("givenName", resp.filename)
+    withTx {
+      val v = newVertex
+      v(filenameProp) = resp.archive.fullName
+      v(uniqueIdProp) = resp.id
+      v("sharry-givenName") = resp.filename
     }
   }
 
   private def deleteNode(id: String): Option[FileName] = {
-    import collection.JavaConversions._
-    db.withTx { g: BlueprintGraph =>
-      g.getVertices(uniqueIdProp, id).headOption.map { v =>
-        val fn = FileName(v.getProperty(filenameProp).asInstanceOf[String])
-        g.removeVertex(v)
+    withTx {
+      singleVertex(uniqueIdProp := id).map { v =>
+        val fn = FileName(v.get[String](filenameProp).get)
+        graph.removeVertex(v)
         fn
       }
     }
   }
 
+  private def aliasToNode(alias: Alias, v: Vertex) {
+    v(aliasProp) = alias.name
+    v("enabled") = alias.enabled
+    v("notification") = alias.notification
+    alias.timeout.map { to => v("timeout") = to.millis }
+    if (!alias.defaultPassword.isEmpty) {
+      v("defaultPassword") = new String(alias.defaultPassword)
+    }
+  }
+  private def nodeToAlias(v: Vertex): Alias = withTx {
+    import Timeout._
+    Alias(
+      name = v.get[String](aliasProp).get,
+      enabled = v.get[Boolean]("enabled").getOrElse(false),
+      notification = v.get[Boolean]("notification").getOrElse(false),
+      timeout = v.get[Long]("timeout").map(_.millis),
+      defaultPassword = v.get[String]("defaultPassword").getOrElse("").toCharArray
+    )
+  }
+
+  def updateAlias(login: String, alias: Alias) {
+    withTx {
+      val vlogin = vertex(loginProp := login)
+      val valias = vertex(aliasProp := alias.name, v => {
+        vlogin --> "alias" --> v
+      })
+      aliasToNode(alias, valias)
+    }
+  }
+
+
+  def removeAlias(alias: String) {
+    withTx {
+      singleVertex(aliasProp := alias).map { v =>
+        graph.removeVertex(v)
+      }
+    }
+  }
+
+  def findUser(alias: String) = withTx {
+    singleVertex(aliasProp := alias).flatMap {v =>
+      (v -<- "alias").mapEnds(lv => lv.get[String](loginProp).get).headOption
+    }
+  }
+
+
+  def findAlias(alias: String) = withTx {
+    singleVertex(aliasProp := alias).map(nodeToAlias)
+  }
+
+  def listAliases(login: String) = {
+    singleVertex(loginProp := login).map { v =>
+      v ->-() mapEnds(nodeToAlias)
+    } getOrElse(Seq())
+  }
 }
 
 object SharryServiceImpl {
-  private val chars = List('-', '$', '+') ::: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
+  private val chars = List('-', '§') ::: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
   private val random = new SecureRandom()
 
-  private def randomPassword(len: Int) = {
+  def randomPassword(len: Int) = {
     val pw = for (i <- 1 to len) yield chars(random.nextInt(chars.size))
     pw.toArray
   }
 
-  private def randomId(len: Int) = new String(randomPassword(len))
+  def randomId(len: Int) = new String(randomPassword(len))
 }

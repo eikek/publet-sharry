@@ -21,11 +21,10 @@ import org.eknet.publet.web.util.{PubletWebContext, PubletWeb, RenderUtils}
 import org.eknet.publet.ext.{MailSupport, MailSessionFactory}
 import org.eknet.publet.web.Config
 import com.google.common.base.Splitter
-import java.security.SecureRandom
 import org.eknet.publet.sharry.lib.FileName
 import org.eknet.publet.vfs.util.ByteSize
 import java.text.DateFormat
-import org.eknet.publet.sharry.SharryService.{AddResponse, ArchiveInfo}
+import org.eknet.publet.sharry.SharryService.{Alias, AddResponse, ArchiveInfo}
 import org.eknet.publet.vfs.Path
 
 /**
@@ -37,18 +36,16 @@ package object ui extends MailSupport {
 
   def param(name: String) = PubletWebContext.param(name).filter(!_.isEmpty)
   def longParam(name: String) = param(name).map(_.toLong)
+  def boolParam(name: String) = param(name) match {
+    case Some(x) if (x.equalsIgnoreCase("on")) => true
+    case Some(x) if (x.equalsIgnoreCase("yes")) => true
+    case Some(x) if (x.equalsIgnoreCase("true")) => true
+    case _ => false
+  }
 
   def makeJson(data: Any) = RenderUtils.makeJson(data)
 
   def sharry = PubletWeb.instance[SharryService].get
-
-  private val chars = '-' :: '_' :: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
-
-  def randomPassword(len: Int) = {
-    val random = new SecureRandom()
-    val pw = for (i <- 1 to len) yield chars(random.nextInt(chars.size))
-    pw.toArray
-  }
 
   def sendMails(from: String, tos: String, subject: String, text: String): Either[Exception, String] = {
     def isValid(str: String) = str != null && !str.isEmpty
@@ -93,6 +90,15 @@ package object ui extends MailSupport {
     "givenName" -> resp.filename,
     "password" -> new String(resp.password),
     "url" -> PubletWebContext.urlOf(sharryPath / "download" / resp.id)
+  )
+
+  def aliasToMap(a: Alias) = Map(
+    "name" -> a.name,
+    "defaultPassword" -> (if (a.defaultPassword.isEmpty) false else new String(a.defaultPassword)),
+    "timeout" -> a.timeout.map(_.days.toInt).getOrElse(-1),
+    "enabled" -> a.enabled,
+    "notification" -> a.notification,
+    "url" -> PubletWebContext.urlOf(sharryPath / "foruser" / a.name)
   )
 
   def mailSession = PubletWeb.instance[MailSessionFactory].get

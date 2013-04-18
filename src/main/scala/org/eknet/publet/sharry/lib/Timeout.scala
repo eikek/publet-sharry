@@ -25,12 +25,14 @@ import java.util.concurrent.TimeUnit
 case class Timeout(value: Long, unit: TimeUnit) {
 
   lazy val millis = TimeUnit.MILLISECONDS.convert(value, unit)
+  lazy val days = TimeUnit.DAYS.convert(value, unit)
 
 }
 
 object Timeout {
 
   class TimeoutLong(value: Long) {
+    def millis = Timeout(value, TimeUnit.MILLISECONDS)
     def seconds = Timeout(value, TimeUnit.SECONDS)
     def minutes = Timeout(value, TimeUnit.MINUTES)
     def hours = Timeout(value, TimeUnit.HOURS)
