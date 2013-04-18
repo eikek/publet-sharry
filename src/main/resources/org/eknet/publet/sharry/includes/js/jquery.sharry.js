@@ -228,7 +228,7 @@
       '</script>';
 
   var uploadOkTemplate = '<div class="well">' +
-      '<h2>Download "{{givenName}}" ready!</h2><br/>'+
+      '<h2>"{{givenName}}" ready for download!</h2><br/>'+
       '<p><a href="{{url}}">{{url}} ({{sizeString}})</a> <br/></p>'+
       '<p>Valid until: {{validUntilDate}}</p>'+
       '<p>Password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +

@@ -23,6 +23,14 @@ assetGroups: publet-sharry.assets
 
 .row
   .span7
+    .accordion#howitworks
+      .accordion-group
+        .accordion-heading
+          a.accordion-toggle(data-toggle="collapse" data-parent="#howitworks" href="#howitworksText")
+            | Read how it works
+        #howitworksText.accordion-body.collapse
+          .accordion-inner
+            =include("howitworks.md")
     :markdown
       Use the _Add files..._ button to select files from your hard disk, or just drag&drop them on this page!
 
@@ -30,6 +38,3 @@ assetGroups: publet-sharry.assets
   .span5
     h3 Your Archives
     #sharryArchives
-
--# - setAttribute("includeJs", Some(false))
--# =include("_sharry.jade")

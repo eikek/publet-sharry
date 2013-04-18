@@ -1,24 +1,41 @@
 ---
-title: Publet Sharry
+title: Publet Sharry - Download
 assetGroups: publet-sharry.assets
 
 --- name:head pipeline:jade
 
 --- name:content pipeline:jade
 - import org.eknet.publet.sharry._
+- import java.text.DateFormat
+- import java.util.Date
 - val id: String = PubletWebContext.attr(idKey).getOrElse("")
+- val service: SharryService = PubletWeb.instance[SharryService].get
+- val info = service.findArchive(id)
 
 .page-header
   h1
     | »Sharry«
     small Safely share files
 
-.well
-  h2 Download
-  form(action="../actions/download.zip" method="post")
-    label Password:
-    input.input-xlarge(type="password" name="password" required="required")
-    span.help-block Supply the correct password for this download. If the password is wrong, you'll receive a file anyways, but it will be empty.
-    input(type="hidden" name="filename" value={ id })
-    br/
-    button.btn.btn-primary(href="#" type="submit") Download
+- if (info.isEmpty) {
+  .alert.alert-error
+    :markdown
+      **Bad Request** There is no information available what to download.
+
+- } else {
+  - val format = DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale)
+  - val untilDate = if (info.get.archive.until<=0) "Forever" else format.format(new java.util.Date(info.get.archive.until))
+  .well
+    h2 Download "#{info.get.name}"
+    p.text-info
+      | owned by #{info.get.archive.owner}
+      - if (info.get.archive.until > 0)
+        |; Valid until: #{untilDate}
+    form(action="../actions/download.zip" method="post")
+      label Password:
+      input.input-xlarge(type="password" name="password" required="required")
+      span.help-block Supply the password for this download. If the password is wrong, you'll receive an empty file.
+      input(type="hidden" name="filename" value={ id })
+      br/
+      button.btn.btn-primary(href="#" type="submit") Download
+- }
