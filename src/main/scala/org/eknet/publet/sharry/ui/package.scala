@@ -98,7 +98,7 @@ package object ui extends MailSupport {
     "timeout" -> a.timeout.map(_.days.toInt).getOrElse(-1),
     "enabled" -> a.enabled,
     "notification" -> a.notification,
-    "url" -> PubletWebContext.urlOf(sharryPath / "foruser" / a.name)
+    "url" -> PubletWebContext.urlOf(sharryPath / "upload" / a.name)
   )
 
   def mailSession = PubletWeb.instance[MailSessionFactory].get

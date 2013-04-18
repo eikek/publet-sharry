@@ -65,7 +65,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       archive = fn,
       filename = req.filename.getOrElse(fn.checksum.take(10)+"."+fn.ext),
       password = req.password,
-      id = randomId(10)
+      id = randomId(10, 15)
     )
     val resp = sharry.addFiles(req.files, req.owner, req.password, req.timeout)
       .right.map(createResponse(req, _))
@@ -162,7 +162,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
   }
 
   def findUser(alias: String) = withTx {
-    singleVertex(aliasProp := alias).flatMap {v =>
+    singleVertex(aliasProp := alias).filter(v => v("enabled") == Some(true)).flatMap {v =>
       (v -<- "alias").mapEnds(lv => lv.get[String](loginProp).get).headOption
     }
   }
@@ -188,5 +188,9 @@ object SharryServiceImpl {
     pw.toArray
   }
 
-  def randomId(len: Int) = new String(randomPassword(len))
+  def randomId(minLen: Int, maxLen: Int): String = {
+    val len = random.nextInt(maxLen-minLen) + minLen
+    randomId(len)
+  }
+  def randomId(len: Int): String = new String(randomPassword(len))
 }

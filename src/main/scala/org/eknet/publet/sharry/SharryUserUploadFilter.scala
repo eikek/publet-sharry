@@ -32,7 +32,7 @@ import org.eknet.publet.web.{PubletRequestWrapper, ReqUtils}
  */
 class SharryUserUploadFilter @Inject() (@Named("sharryPath") path: Path, publet: Publet) extends RequestHandlerFactory {
 
-  private lazy val downloadPath = path / "foruser"
+  private lazy val downloadPath = path / "upload"
 
   def getApplicableScore(req: HttpServletRequest) = {
     val util = new ReqUtils(req)

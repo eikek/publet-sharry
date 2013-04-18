@@ -227,13 +227,17 @@
       '{% } %}'+
       '</script>';
 
-  var uploadOkTemplate = '<div class="well">' +
-      '<h2>"{{givenName}}" ready for download!</h2><br/>'+
-      '<p><a href="{{url}}">{{url}} ({{sizeString}})</a> <br/></p>'+
-      '<p>Valid until: {{validUntilDate}}</p>'+
-      '<p>Password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +
-      '<hr/>'+
-      '<p><a class="btn btn-primary btn-large shareEmailButton" href="#"><i class="icon-envelope icon-white"></i> Share via Email</a> </div></p>' +
+  var uploadOkTemplate =
+      '<div class="well">' +
+      '  <h2>"{{givenName}}" ready for download!</h2><br/>'+
+      '  <p><a href="{{url}}">{{url}} ({{sizeString}})</a> <br/></p>'+
+      '  <p>Valid until: {{validUntilDate}}</p>'+
+      '  <p>Password is: <b style="display:none" class="password">{{password}}</b> &nbsp; <a class="btn showPasswordButton">Show password</a></p>' +
+      '  <hr/>'+
+      '  <p>' +
+      '   <a class="btn btn-primary shareEmailButton" href="#"><i class="icon-envelope icon-white"></i> Share via Email</a> ' +
+      '   <a class="btn btn-success newUploadButton" href="#"><i class="icon-repeat icon-white"></i> New Upload</a> ' +
+      '  </p>' +
       '</div>';
 
   var shareEmailTemplate =
