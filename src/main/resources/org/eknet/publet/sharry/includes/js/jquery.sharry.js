@@ -39,7 +39,7 @@
     $this.find('.sharryUpload').html(Mustache.render(uploadFormTemplate, settings));
     var fu = $this.find('form.fileuploadForm').fileupload({
       singleFileUploads: false,
-      limitConcurrentUploads: 2,
+      limitConcurrentUploads: 1,
       autoUpload: false,
       downloadTemplateId: null,
       downloadTemplate: function (o) {
