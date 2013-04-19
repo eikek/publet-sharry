@@ -49,6 +49,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
   private val loginProp = "sharry-username"
   private val aliasProp = "sharry-username-alias"
   private val givenName = "sharry-givenName"
+  private val senderProp = "sharry-sender"
 
   for (prop <- List(filenameProp, uniqueIdProp, loginProp, aliasProp)) {
     if (!db.graph.getIndexedKeys(classOf[Vertex]).contains(prop)) {
@@ -58,14 +59,15 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
 
   def addFiles(request: AddRequest) = {
     val req = request match {
-      case AddRequest(_, _, pw, _, _) if (pw.isEmpty) => request.copy(password = randomPassword(18))
+      case AddRequest(_, _, pw, _, _, _) if (pw.length==0) => request.copy(password = randomPassword(18))
       case r => r
     }
     def createResponse(req: AddRequest, fn: FileName) = AddResponse(
       archive = fn,
       filename = req.filename.getOrElse(fn.checksum.take(10)+"."+fn.ext),
       password = req.password,
-      id = randomId(10, 15)
+      id = randomId(10, 15),
+      sender = req.sender.getOrElse(fn.owner)
     )
     val resp = sharry.addFiles(req.files, req.owner, req.password, req.timeout)
       .right.map(createResponse(req, _))
@@ -85,7 +87,8 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
         ArchiveInfo(
           archive = FileName(v.get[String](filenameProp).get),
           name = v.get[String](givenName).get,
-          id = v.get[String](uniqueIdProp).get
+          id = v.get[String](uniqueIdProp).get,
+          sender = v.get[String](senderProp).get
         )
       }
     }
@@ -109,6 +112,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       v(filenameProp) = resp.archive.fullName
       v(uniqueIdProp) = resp.id
       v(givenName) = resp.filename
+      v(senderProp) = resp.sender
     }
   }
 

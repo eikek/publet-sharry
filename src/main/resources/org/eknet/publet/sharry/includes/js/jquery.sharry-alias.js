@@ -158,12 +158,12 @@
               form.find('input[name="defaultPassword"]').val(data.defaultPassword);
             }
             if (data.enabled) {
-              form.find('input[name="enabled"]').attr('checked', 'yes');
+              form.find('input[name="enabled"]').attr('checked', 'checked');
             } else {
               form.find('input[name="enabled"]').removeAttr('checked');
             }
             if (data.notification) {
-              form.find('input[name="notification"]').attr('checked', 'yes');
+              form.find('input[name="notification"]').attr('checked', 'checked');
             } else {
               form.find('input[name="notification"]').removeAttr('checked');
             }

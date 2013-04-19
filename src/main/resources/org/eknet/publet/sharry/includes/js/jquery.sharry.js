@@ -24,7 +24,7 @@
   var initTemplate = '<div>' +
       '<div class="sharryScreen sharryUpload fade"></div> ' +
       '<div class="sharryScreen sharryUploadDoneOk fade"></div> ' +
-      '<div class="sharryScreen sharryShareEmail fade"></div> ' +
+      '<div class="sharryShareEmail"></div> ' +
       '</div>';
 
   function showScreens($this, names) {
@@ -35,7 +35,22 @@
   }
 
   function renderUpload($this, settings) {
+    $this.html(Mustache.render(initTemplate, settings));
     $this.find('.sharryShareEmail').html(Mustache.render(shareEmailTemplate, settings));
+    $this.find('.sharryShareEmail form').ajaxForm({
+      beforeSubmit: function(arr, form, options) {
+        form.mask();
+      },
+      success: function(resp, status, xhr, form) {
+        form.unmask();
+        var css = resp.success === false ? "alert-error" : "alert-success";
+        form.find('.mailFeedback').feedbackMessage({
+          message: resp.message,
+          cssClass: 'alert ' + css
+        });
+      }
+    });
+
     $this.find('.sharryUpload').html(Mustache.render(uploadFormTemplate, settings));
     var fu = $this.find('form.fileuploadForm').fileupload({
       singleFileUploads: false,
@@ -67,8 +82,16 @@
       if (data.result.success === false) {
         fileupload.html('<p class="alert alert-error"><strong>Error</strong> '+data.result.message+'</p>');
       } else {
-        settings.result = data.result;
         fileupload.html(Mustache.render(uploadOkTemplate, data.result));
+
+        fileupload.find('.shareEmailButton').click(function(e) {
+          $this.find('.mailModal').modal('toggle');
+        });
+        fileupload.find('.newUploadButton').click(function(e) {
+          fu.fileupload("destroy");
+          renderUpload($this, settings);
+        });
+
         fileupload.find('.showPasswordButton').click(function(e) {
           var pw = fileupload.find('.password').css("display");
           if (pw === "none") {
@@ -79,28 +102,16 @@
             $(e.target).text("Show Password");
           }
         });
-        fileupload.find('.shareEmailButton').click(function(e) {
-          $this.find('.sharryShareEmail input[name="subject"]').val("[Sharry] Download Ready");
-          var msg = Mustache.render(emailTextTemplate, settings.result);
-          $this.find('.sharryShareEmail textarea[name="message"]').val(msg);
-          showScreens($this, ["sharryUploadDoneOk", "sharryShareEmail"]);
-          $this.find('.sharryShareEmail form').ajaxForm({
-            beforeSubmit: function(arr, form, options) {
-              form.mask();
-            },
-            success: function(resp, status, xhr, form) {
-              form.unmask();
-              var css = resp.success === false ? "alert-error" : "alert-success";
-              form.find('.mailFeedback').feedbackMessage({
-                message: resp.message,
-                cssClass: 'alert ' + css
-              });
-            }
-          });
-        });
+
+        $this.find('.sharryShareEmail input[name="subject"]').val("[Sharry] Download Ready");
+        var msg = Mustache.render(emailTextTemplate, data.result);
+        $this.find('.sharryShareEmail textarea[name="message"]').val(msg);
+
       }
       showScreens($this, ["sharryUploadDoneOk"]);
     });
+
+    showScreens($this, ["sharryUpload"]);
   }
 
 
@@ -113,16 +124,15 @@
         if (!data) {
           var settings = $.extend({
             uploadUrl: "actions/upload.json",
-            shareMailUrl: "actions/sharemail.json"
+            shareMailUrl: "actions/sharemail.json",
+            forAlias: null
           }, options);
           $(this).data('sharry', {
             target: $this,
             settings: settings
           });
 
-          $this.html(Mustache.render(initTemplate, settings));
           renderUpload($this, settings);
-          showScreens($this, ["sharryUpload"]);
         }
       });
     }
@@ -241,19 +251,30 @@
       '</div>';
 
   var shareEmailTemplate =
-      '<form action="{{shareMailUrl}}">' +
-      '  <div class="mailFeedback"></div>'+
-      '  <fieldset>'+
-      '  <label>Receivers</label>'+
-      '  <input class="input-block-level" type="text" name="receivers" required="required"/> ' +
-      '  <span class="help-block">list of emails, for example: me@gmail.com, john.doe@hotmail.com</span> '+
-      '  <label>Subject</label>' +
-      '  <input class="input-block-level" type="text" name="subject"/>' +
-      '  <label>Message</label>'+
-      '  <textarea class="input-block-level" name="message" cols="30" rows="10"/>' +
-      '  <br/><button href="#" class="btn btn-primary"><i class="icon-envelope icon-white"></i> Send</button> '+
-      '  </fieldset>'+
-      '</form>';
+      '<div class="modal hide fade mailModal">' +
+      '  <form action="{{shareMailUrl}}">' +
+      '  <div class="modal-header">' +
+      '    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'+
+      '    <h3>Send Email</h3>'+
+      '  </div> '+
+      '  <div class="modal-body">' +
+      '    <fieldset>'+
+      '      <label>Receivers</label>'+
+      '      <input class="input-block-level" type="text" name="receivers" required="required"/> ' +
+      '      <span class="help-block">list of emails, for example: me@gmail.com, john.doe@hotmail.com</span> '+
+      '      <label>Subject</label>' +
+      '      <input class="input-block-level" type="text" name="subject"/>' +
+      '      <label>Message</label>'+
+      '      <textarea class="input-block-level" name="message" cols="30" rows="9"/>' +
+      '    </fieldset>'+
+      '  </div> '+
+      '  <div class="modal-footer">' +
+      '    <span class="mailFeedback"></span>'+
+      '      <a class="btn" data-dismiss="modal">Close</a> ' +
+      '    <button href="#" class="btn btn-primary"><i class="icon-envelope icon-white"></i> Send</button> '+
+      '  </div> '+
+      '  </form>'+
+      '</div> ';
 
   var emailTextTemplate = "Hi,\n\n" +
       "The download '{{givenName}}' ({{sizeString}}) is ready:\n\n" +

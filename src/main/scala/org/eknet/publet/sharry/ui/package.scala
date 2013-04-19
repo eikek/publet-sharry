@@ -82,6 +82,8 @@ package object ui extends MailSupport {
   def archiveInfo2Map(ai: ArchiveInfo) = fileName2Map(ai.archive) ++ Map(
     "id" -> ai.id,
     "givenName" -> ai.name,
+    "sender" -> ai.sender,
+    "senderIsOwner" -> (ai.sender == ai.archive.owner),
     "url" -> PubletWebContext.urlOf(sharryPath / "download" / ai.id)
   )
 

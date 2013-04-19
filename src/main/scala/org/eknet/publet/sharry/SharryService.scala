@@ -53,12 +53,13 @@ object SharryService {
                         owner: String,
                         password: Array[Char] = Array(),
                         timeout: Option[Timeout] = None,
-                        filename: Option[String] = None)
+                        filename: Option[String] = None,
+                        sender: Option[String] = None)
 
 
-  case class AddResponse(id: String, archive: FileName, filename: String, password: Array[Char])
+  case class AddResponse(id: String, archive: FileName, filename: String, password: Array[Char], sender: String)
 
-  case class ArchiveInfo(archive: FileName, name: String, id: String)
+  case class ArchiveInfo(archive: FileName, name: String, id: String, sender: String)
 
   case class Alias(name: String,
                    enabled: Boolean = true,

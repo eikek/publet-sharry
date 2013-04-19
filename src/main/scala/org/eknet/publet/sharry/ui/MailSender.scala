@@ -31,9 +31,9 @@ class MailSender extends ScalaScript {
     val receivers = param("receivers")
     val subject = param("subject")
     val message = param("message")
-    (receivers, subject, message) match {
-      case (Some(rec), Some(subj), Some(msg)) => {
-        sendMails(getFromMail.get, rec, subj, msg)
+    (getFromMail, receivers, subject, message) match {
+      case (Some(from), Some(rec), Some(subj), Some(msg)) => {
+        sendMails(from, rec, subj, msg)
           .fold(failure, success)
       }
       case _ => makeJson(Map("success" -> false, "message" -> "Too less arguments"))

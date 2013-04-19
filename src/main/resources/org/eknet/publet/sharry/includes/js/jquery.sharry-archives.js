@@ -36,6 +36,7 @@
       '    <th>Name</th>' +
       '    <th>Valid Until</th>' +
       '    <th>Size</th>' +
+      '    <th>Sender</th>' +
       '  </tr>' +
       '</thead><tbody>' +
       '{{#archives}}' +
@@ -52,6 +53,7 @@
       '  <td>{{givenName}}</td>' +
       '  <td>{{validUntilDate}}</td>' +
       '  <td>{{sizeString}}</td>' +
+      '  <td>{{sender}}</td>' +
       '</tr>' +
       '{{/archives}}' +
       '</tbody></table>' +
