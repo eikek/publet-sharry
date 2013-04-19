@@ -82,7 +82,11 @@
       if (data.result.success === false) {
         fileupload.html('<p class="alert alert-error"><strong>Error</strong> '+data.result.message+'</p>');
       } else {
-        fileupload.html(Mustache.render(uploadOkTemplate, data.result));
+        if (settings.forAlias) {
+          fileupload.html(Mustache.render(uploadOkAnonymousTemplate, data.result));
+        } else {
+          fileupload.html(Mustache.render(uploadOkTemplate, data.result));
+        }
 
         fileupload.find('.shareEmailButton').click(function(e) {
           $this.find('.mailModal').modal('toggle');
@@ -123,7 +127,7 @@
 
         if (!data) {
           var settings = $.extend({
-            uploadUrl: "actions/upload.json",
+            uploadUrl: "open/upload.json",
             shareMailUrl: "actions/sharemail.json",
             forAlias: null
           }, options);
@@ -157,6 +161,7 @@
       '      <input type="file" name="files[]" multiple>'+
       '    </span>'+
       '    <input type="hidden" id="containerPathInput" name="container" value=""/>'+
+      '   {{#forAlias}}<input type="hidden" name="forAlias" value="{{forAlias}}"/> {{/forAlias}}' +
       '    <button type="submit" class="btn btn-inverse start">'+
       '      <i class="icon-upload icon-white"></i>'+
       '      <span>Start upload</span>'+
@@ -168,6 +173,7 @@
       '  </div>'+
       '  <div class="fileupload-loading"></div><br/>'+
       '  <div>'+
+      '  {{^forAlias}}' +
       '    <div class="control-group">' +
       '      <label class="control-label">Password</label>'+
       '      <div class="controls">' +
@@ -190,6 +196,7 @@
       '        </select>'+
       '      </div>'+
       '    </div>' +
+      '  {{/forAlias}}' +
       '    <div class="control-group">' +
       '      <label class="control-label">Name</label>' +
       '      <div class="controls">' +
@@ -246,6 +253,15 @@
       '  <hr/>'+
       '  <p>' +
       '   <a class="btn btn-primary shareEmailButton" href="#"><i class="icon-envelope icon-white"></i> Share via Email</a> ' +
+      '   <a class="btn btn-success newUploadButton" href="#"><i class="icon-repeat icon-white"></i> New Upload</a> ' +
+      '  </p>' +
+      '</div>';
+  var uploadOkAnonymousTemplate =
+      '<div class="well">' +
+      '  <h2>"{{givenName}}" successfully uploaded!</h2><br/>'+
+      '  <p>The user has been notified. Thank you.</p>'+
+      '  <hr/>'+
+      '  <p>' +
       '   <a class="btn btn-success newUploadButton" href="#"><i class="icon-repeat icon-white"></i> New Upload</a> ' +
       '  </p>' +
       '</div>';

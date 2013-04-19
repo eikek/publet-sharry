@@ -56,12 +56,15 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
     publet.mountManager.mount(path, cont)
 
     val scripts = new MapContainer
-    scripts.addResource(new WebScriptResource("upload.json".rn, new UploadHandler))
     scripts.addResource(new WebScriptResource("sharemail.json".rn, new MailSender))
     scripts.addResource(new WebScriptResource("listarchives.json".rn, new ArchiveManage))
     scripts.addResource(new WebScriptResource("managealias.json".rn, new AliasManage))
-    scripts.addResource(new DownloadHandler("download".rn))
     publet.mountManager.mount(path / "actions", scripts)
+
+    val open = new MapContainer
+    open.addResource(new WebScriptResource("upload.json".rn, new UploadHandler))
+    open.addResource(new DownloadHandler("download".rn))
+    publet.mountManager.mount(path / "open", open)
   }
 
   @Subscribe

@@ -17,14 +17,15 @@
 package org.eknet.publet.sharry.ui
 
 import org.eknet.publet.engine.scala.ScalaScript
-import org.eknet.publet.web.util.{PubletWebContext, RenderUtils}
+import org.eknet.publet.web.util.{PubletWeb, PubletWebContext}
 import org.eknet.publet.web.shiro.Security
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.ByteSize
-import org.eknet.publet.sharry.lib.{Entry, FileName}
+import org.eknet.publet.sharry.lib.Entry
 import java.text.DateFormat
 import org.apache.commons.fileupload.FileItem
 import org.eknet.publet.sharry.SharryService.{AddResponse, AddRequest}
+import org.eknet.publet.auth.store.{DefaultAuthStore, UserProperty}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,18 +34,15 @@ import org.eknet.publet.sharry.SharryService.{AddResponse, AddRequest}
 class UploadHandler extends ScalaScript with Logging {
 
   def serve() = {
-    import org.eknet.publet.sharry.lib.Timeout._
     val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
-    val timeout = longParam("timeout").filter(_ > 0).map(_.days)
-    val req = AddRequest(
-      files = uploads,
-      password = param("password").map(_.toCharArray).getOrElse(Array()),
-      owner = Security.username,
-      timeout = timeout,
-      filename = param("name")
-    )
-    val resp = sharry.addFiles(req)
-    resp.fold(failure, success)
+    if (uploads.isEmpty) {
+      makeJson(Map("success" -> false, "message" -> "No files given."))
+    } else {
+      param("forAlias") match {
+        case Some(alias) => anonymousUpload(alias, uploads)
+        case _ => authenticatedUpload(uploads)
+      }
+    }
   }
 
   private def success(resp: AddResponse) = makeJson(addResponse2Map(resp))
@@ -54,8 +52,77 @@ class UploadHandler extends ScalaScript with Logging {
     makeJson(Map("success" -> false, "message" -> exc.getMessage))
   }
 
+  private def anonymousUpload(aliasId: String, uploads: Iterable[Entry]) = {
+    sharry.findAlias(aliasId).map(a => (a, sharry.findUser(a.name))) match {
+      case Some((alias, Some(owner))) => {
+        import org.eknet.publet.sharry.lib.Timeout._
+        val timeout = alias.timeout.getOrElse(14.days)
+        val req = AddRequest (
+          files = uploads,
+          password = alias.defaultPassword,
+          owner = owner,
+          timeout = Some(timeout),
+          filename = param("name"),
+          sender = Some(alias.name)
+        )
+        val resp = sharry.addFiles(req)
+        if (alias.notification && resp.isRight) {
+          authStore.findUser(owner).flatMap(_.get(UserProperty.email)) match {
+            case Some(email) => {
+              val subject = "[Sharry] Upload '%s' ready".format(resp.right.get.filename)
+              sendMails(email, email, subject, mailText(resp.right.get))
+                .left.map(e => error("Cannot send mail!", e))
+            }
+            case _ => warn("No email for user '"+owner+"'!")
+          }
+        }
+        resp.right.map(_.copy(password = Array())).fold(failure, success)
+      }
+      case _ => makeJson(Map("success" -> false, "message" -> "Alias not found."))
+    }
+  }
+
+  private def mailText(resp: AddResponse) =
+    """Hi %s,
+      |
+      |The upload '%s' (%s) has completed from your alias page %s.
+      |
+      |Check it out: %s
+      |Password: %s
+      |
+      |It is valid until %s.
+      |
+      |Regards.
+    """.stripMargin.format(resp.archive.owner,
+      resp.filename,
+      ByteSize.bytes.normalizeString(resp.archive.size),
+      resp.sender,
+      PubletWebContext.urlOf(sharryPath / "download" / resp.id),
+      new String(resp.password),
+      untilDateString(resp.archive))
+
+  private def authenticatedUpload(uploads: Iterable[Entry]) = {
+    if (!Security.isAuthenticated) {
+      makeJson(Map("success"->false, "message" -> "Not authorized."))
+    } else {
+      import org.eknet.publet.sharry.lib.Timeout._
+      val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
+      val timeout = longParam("timeout").filter(_ > 0).map(_.days)
+      val req = AddRequest(
+        files = uploads,
+        password = param("password").map(_.toCharArray).getOrElse(Array()),
+        owner = Security.username,
+        timeout = timeout,
+        filename = param("name")
+      )
+      val resp = sharry.addFiles(req)
+      resp.fold(failure, success)
+    }
+  }
   case class FileItemEntry(i: FileItem) extends Entry {
     def name = i.getName
     def inputStream = i.getInputStream
   }
+
+  def authStore = PubletWeb.instance[DefaultAuthStore].get
 }

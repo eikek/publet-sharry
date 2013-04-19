@@ -42,6 +42,7 @@ class SharryImpl(folder: Path, val folderSizeLimit: Long) extends Sharry with Lo
   def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]) = {
     require(owner != null && !owner.isEmpty, "Owner is required")
     require(password != null && password.length > 0, "password is required")
+    require(!files.isEmpty, "No files to store.")
     if (folderSize >= folderSizeLimit) {
       Left(new IllegalStateException("Maximum folder size "+ ByteSize.bytes.normalizeString(folderSizeLimit) +" exceeded."))
     } else {

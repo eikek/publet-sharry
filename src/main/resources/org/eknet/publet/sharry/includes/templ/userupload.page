@@ -12,7 +12,8 @@ assetGroups: publet-sharry.assets
 :&javascript
   $(function() {
     $('#userUpload').sharry({
-      forUser: "#{id}"
+      "forAlias": "#{id}",
+      "uploadUrl": "../open/upload.json"
     });
   });
 

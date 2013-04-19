@@ -31,7 +31,7 @@ assetGroups: publet-sharry.assets
       | owned by #{info.get.archive.owner}
       - if (info.get.archive.until > 0)
         |; Valid until: #{untilDate}
-    form(action="../actions/download.zip" method="post")
+    form(action="../open/download.zip" method="post")
       label Password:
       input.input-xlarge(type="password" name="password" required="required")
       span.help-block Supply the password for this download. If the password is wrong, you'll receive an empty file.

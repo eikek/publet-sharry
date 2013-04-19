@@ -58,9 +58,9 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
   }
 
   def addFiles(request: AddRequest) = {
-    val req = request match {
-      case AddRequest(_, _, pw, _, _, _) if (pw.length==0) => request.copy(password = randomPassword(18))
-      case r => r
+    val req = request.password match {
+      case pw if (pw.length==0) => request.copy(password = randomPassword(18))
+      case _ => request
     }
     def createResponse(req: AddRequest, fn: FileName) = AddResponse(
       archive = fn,
@@ -184,7 +184,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
 }
 
 object SharryServiceImpl {
-  private val chars = List('-', '§') ::: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
+  private val chars = List('-') ::: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
   private val random = new SecureRandom()
 
   def randomPassword(len: Int) = {

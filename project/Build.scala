@@ -45,6 +45,7 @@ object Dependencies {
   val publetQuartzPlugin = publetQuartz % "publet" exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet")
 
   val providedDeps = Seq(
+    "org.eknet.publet" %% "publet-auth" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
     "org.eknet.publet" %% "publet-web" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
     "org.eknet.publet" %% "publet-webeditor" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),
     "org.eknet.publet" %% "publet-ext" % Version.publet exclude("org.restlet.jse", "org.restlet.ext.fileupload") exclude("org.restlet.jse", "org.restlet"),

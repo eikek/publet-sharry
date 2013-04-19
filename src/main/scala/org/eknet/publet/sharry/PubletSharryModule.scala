@@ -19,23 +19,30 @@ package org.eknet.publet.sharry
 import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBinding}
 import org.eknet.publet.web.Config
 import java.nio.file.{Path => JPath}
-import com.google.inject.{Singleton, Provides}
+import com.google.inject.{Scopes, Singleton, Provides}
 import org.eknet.publet.vfs.util.ByteSize
 import com.google.inject.name.Named
 import grizzled.slf4j.Logging
 import org.eknet.publet.ext.graphdb.GraphDbProvider
 import org.eknet.publet.vfs.Path
 import org.eknet.publet.web.util.Key
+import org.eknet.publet.sharry.test.TestUserStore
+import org.eknet.publet.auth.store.{UserStore, PermissionStore}
 
 class PubletSharryModule extends AbstractPubletModule with PubletBinding with PubletModule with Logging {
 
-  private val defaultFolderSize = ByteSize.mib.toBytes(100)
+  private val defaultFolderSize = ByteSize.mib.toBytes(200)
 
   def configure() {
     bind[PubletSharrySetup].asEagerSingleton()
     bind[SharryService].to[SharryServiceImpl]
     bindRequestHandler.add[SharryDownloadFilter]
     bindRequestHandler.add[SharryUserUploadFilter]
+    bindRequestHandler.add[OpenScriptHandler]
+
+    bind[TestUserStore]
+    setOf[UserStore].add[TestUserStore].in(Scopes.SINGLETON)
+    setOf[PermissionStore].add[TestUserStore].in(Scopes.SINGLETON)
   }
 
   @Provides@Named("sharryPath")

@@ -26,6 +26,8 @@ import org.eknet.publet.vfs.util.ByteSize
 import java.text.DateFormat
 import org.eknet.publet.sharry.SharryService.{Alias, AddResponse, ArchiveInfo}
 import org.eknet.publet.vfs.Path
+import org.eknet.publet.web.shiro.Security
+import org.eknet.publet.auth.store.UserProperty
 
 /**
  *
@@ -73,11 +75,14 @@ package object ui extends MailSupport {
     "sizeString" -> ByteSize.bytes.normalizeString(name.size),
     "created" -> name.time,
     "validUntil" -> name.until,
-    "validUntilDate" -> (if (name.until<=0) "Forever" else DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale).format(new java.util.Date(name.until))),
+    "validUntilDate" -> untilDateString(name),
     "checksum" -> name.checksum,
     "owner" -> name.owner,
     "name" -> name.fullName
   )
+
+  def untilDateString(name: FileName) = if (name.until<=0) "Forever"
+    else DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale).format(new java.util.Date(name.until))
 
   def archiveInfo2Map(ai: ArchiveInfo) = fileName2Map(ai.archive) ++ Map(
     "id" -> ai.id,
