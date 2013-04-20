@@ -22,5 +22,5 @@ package org.eknet.publet.sharry
  */
 object Permissions {
 
-  val sharryGroup = "sharry"
+  val sharryAllowed = "sharry:usage"
 }

@@ -39,9 +39,8 @@ class TestUserStore @Inject() (config: Config) extends UserStoreAdapter with Per
 
   override def findUser(login: String) = users.find(p => p.login == login)
   override def allUser = users
-  override def userOfGroups(groups: String*) = if (groups.toSet.contains(Permissions.sharryGroup)) users else Nil
+  override def userOfGroups(groups: String*) = if (groups.isEmpty) users else Nil
   override def getGroups(login: String) = if (findUser(login).isDefined) allGroups else Set[String]()
-  override def allGroups = Set(Permissions.sharryGroup)
 
   def addPermission(group: String, perm: String) {}
   def dropPermission(group: String, perm: String) {}
@@ -51,6 +50,6 @@ class TestUserStore @Inject() (config: Config) extends UserStoreAdapter with Per
     .map(_.login)
     .map(x => x match  {
     case "admin" => Set("*")
-    case _ => Set("*")
+    case _ => Set(Permissions.sharryAllowed, "resource:read:/sharry/**")
   }).getOrElse(Set[String]())
 }

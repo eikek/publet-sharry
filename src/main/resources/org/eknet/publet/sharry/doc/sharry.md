@@ -1,8 +1,7 @@
 ## Sharry - Sharing Files
 
-Sharry is an extension for [publet](https://eknet.org/main/projects/publet/) that
-allows to share files with others in a simple way. Sharry aims to be a good mix of
-secure and easy to use.
+This extension allows to share files with others in a simple way. Sharry aims
+to be a good mix of secure and easy to use.
 
 ### How it works
 

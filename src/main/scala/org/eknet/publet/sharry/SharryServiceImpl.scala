@@ -38,9 +38,6 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
                                    @Named("maxSharryFolderSize") maxSize: Long,
                                    @Named("sharry-db") db: GraphDb) extends SharryService with GraphDsl {
 
-  import SharryServiceImpl.randomPassword
-  import SharryServiceImpl.randomId
-
   private implicit val graph = db.graph
 
   private val sharry: Sharry = new SharryImpl(folder, maxSize)
@@ -59,14 +56,14 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
 
   def addFiles(request: AddRequest) = {
     val req = request.password match {
-      case pw if (pw.length==0) => request.copy(password = randomPassword(18))
+      case pw if (pw.length==0) => request.copy(password = RandomId.generatePassword(18))
       case _ => request
     }
     def createResponse(req: AddRequest, fn: FileName) = AddResponse(
       archive = fn,
       filename = req.filename.getOrElse(fn.checksum.take(10)+"."+fn.ext),
       password = req.password,
-      id = randomId(10, 15),
+      id = RandomId.generate(10, 15),
       sender = req.sender.getOrElse(fn.owner)
     )
     val resp = sharry.addFiles(req.files, req.owner, req.password, req.timeout)
@@ -181,20 +178,4 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       v ->-() mapEnds(nodeToAlias)
     } getOrElse(Seq())
   }
-}
-
-object SharryServiceImpl {
-  private val chars = List('-') ::: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
-  private val random = new SecureRandom()
-
-  def randomPassword(len: Int) = {
-    val pw = for (i <- 1 to len) yield chars(random.nextInt(chars.size))
-    pw.toArray
-  }
-
-  def randomId(minLen: Int, maxLen: Int): String = {
-    val len = random.nextInt(maxLen-minLen) + minLen
-    randomId(len)
-  }
-  def randomId(len: Int): String = new String(randomPassword(len))
 }

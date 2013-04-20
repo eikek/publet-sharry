@@ -19,7 +19,7 @@ package org.eknet.publet.sharry.ui
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.web.util.PubletWebContext
-import org.eknet.publet.sharry.SharryServiceImpl
+import org.eknet.publet.sharry.{RandomId, SharryServiceImpl}
 import org.eknet.publet.sharry.lib.Timeout
 import org.eknet.publet.sharry.SharryService.Alias
 import java.util.concurrent.TimeUnit
@@ -30,56 +30,51 @@ import java.util.concurrent.TimeUnit
  */
 class AliasManage extends ScalaScript {
 
-  def serve() = {
+  def serve() = asSharryUser {
     param("do") match {
       case Some("list") => listAliases
       case Some("updateAlias") => updateAlias()
       case Some("removeAlias") => removeAlias()
       case Some("getAlias") => getAlias
-      case e@_ => makeJson(Map("success" -> false, "message" -> ("Command not found: "+e)))
+      case e@_ => makeFailure("Command not found: "+e)
     }
   }
 
   def getAlias = {
-    Security.checkAuthenticated()
-    val name = param("aliasName")
-    name match {
+    param("aliasName") match {
       case Some(n) => {
         sharry.findAlias(n).map(aliasToMap).map(m => m + ("success" -> true)).flatMap(makeJson)
       }
-      case _ => makeJson(Map("success" -> false, "message" -> "No alias name given."))
+      case _ => makeFailure("No alias name given.")
     }
   }
 
   def removeAlias() = {
-    Security.checkAuthenticated()
-    val name = param("aliasName")
-    name match {
+    param("aliasName") match {
       case Some(n) => {
         sharry.removeAlias(n)
-        makeJson(Map("success" -> true, "message" -> "Alias removed."))
+        makeSuccess("Alias removed.")
       }
-      case _ => makeJson(Map("success" -> false, "message" -> "No alias name given."))
+      case _ => makeFailure("No alias name given.")
     }
   }
 
   def updateAlias() = {
     val alias = aliasFromParams()
-    if (Security.isAuthenticated) {
-      sharry.updateAlias(Security.username, alias)
-    }
-    makeJson(Map("success" -> true, "message" -> "Alias added"))
+    sharry.updateAlias(Security.username, alias)
+    makeSuccess("Alias added")
   }
 
   private def aliasFromParams() = {
     import Timeout._
-    val aliasName = param("aliasName").getOrElse(SharryServiceImpl.randomId(8,12))
+    val aliasName = param("aliasName").getOrElse(RandomId.generate(8,12))
     val timeout = longParam("timeout").getOrElse(14L).days
     val defaultPassw = param("defaultPassword").map(_.toCharArray).getOrElse(Array[Char]())
     val enabled = boolParam("enabled")
     val notification = boolParam("notification")
     Alias(aliasName, enabled, defaultPassw, Some(timeout), notification)
   }
+
   def listAliases = {
     val login = Security.username
     val list = sharry.listAliases(login)

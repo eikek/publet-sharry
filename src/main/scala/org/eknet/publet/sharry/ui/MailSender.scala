@@ -26,15 +26,14 @@ import org.eknet.publet.auth.store.UserProperty
  */
 class MailSender extends ScalaScript {
 
-  def serve() = {
-    Security.checkAuthenticated()
+  def serve() = asSharryUser {
     val receivers = param("receivers")
     val subject = param("subject")
     val message = param("message")
     (getFromMail, receivers, subject, message) match {
       case (Some(from), Some(rec), Some(subj), Some(msg)) => {
         sendMails(from, rec, subj, msg)
-          .fold(failure, success)
+          .fold(failure, makeSuccess)
       }
       case _ => makeJson(Map("success" -> false, "message" -> "Too less arguments"))
     }
@@ -42,11 +41,7 @@ class MailSender extends ScalaScript {
 
   def failure(e: Exception) = {
     error("Error sending mails", e)
-    makeJson(Map("success" -> false, "message" -> e.getMessage))
-  }
-
-  def success(msg: String) = {
-    makeJson(Map("success" -> true, "message" -> msg))
+    makeFailure(e.getMessage)
   }
 
   def getFromMail = Security.user.flatMap(_.get(UserProperty.email)).orElse(config("sharry.from"))

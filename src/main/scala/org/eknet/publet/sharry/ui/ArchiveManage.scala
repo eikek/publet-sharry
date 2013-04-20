@@ -28,8 +28,7 @@ import org.eknet.publet.sharry.lib.FileName
  */
 class ArchiveManage extends ScalaScript {
 
-  def serve() = {
-    Security.checkAuthenticated()
+  def serve() = asSharryUser {
     param("do") match {
       case Some("list") => listArchives
       case Some("removeArchive") => deleteArchive()
@@ -53,9 +52,9 @@ class ArchiveManage extends ScalaScript {
     param("archive").flatMap(FileName.tryParse) match {
       case Some(fn) => {
         sharry.removeFiles(_.archive == fn)
-        makeJson(Map("success" -> true, "message" -> "Archive removed."))
+        makeSuccess("Archive removed.")
       }
-      case _ => makeJson(Map("success" -> false, "message" -> "Cannot remove archive."))
+      case _ => makeFailure("Cannot remove archive.")
     }
   }
 }

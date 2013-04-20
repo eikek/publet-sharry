@@ -18,7 +18,7 @@ assetGroups: publet-sharry.assets
   });
 
 --- name:content pipeline:jade
-- Security.checkAuthenticated()
+- Security.checkPerm("sharry:usage")
 
 .page-header
   h1

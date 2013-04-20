@@ -25,7 +25,7 @@ import org.eknet.publet.sharry.lib.FileName
 import org.eknet.publet.vfs.util.ByteSize
 import java.text.DateFormat
 import org.eknet.publet.sharry.SharryService.{Alias, AddResponse, ArchiveInfo}
-import org.eknet.publet.vfs.Path
+import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.shiro.Security
 import org.eknet.publet.auth.store.UserProperty
 
@@ -46,6 +46,9 @@ package object ui extends MailSupport {
   }
 
   def makeJson(data: Any) = RenderUtils.makeJson(data)
+
+  def makeSuccess(message: String) = makeJson(Map("success" -> true, "message" -> message))
+  def makeFailure(message: String) = makeJson(Map("success" -> false, "message" -> message))
 
   def sharry = PubletWeb.instance[SharryService].get
 
@@ -112,4 +115,12 @@ package object ui extends MailSupport {
   def config = PubletWeb.instance[Config].get
 
   def sharryPath = PubletWeb.instance[Path].named("sharryPath")
+
+  def asSharryUser(body: => Option[Content]) = {
+    if (Security.hasPerm(Permissions.sharryAllowed)) {
+      body
+    } else {
+      makeFailure("Unauthorized.")
+    }
+  }
 }

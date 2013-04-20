@@ -22,7 +22,6 @@ import org.eknet.publet.web.shiro.Security
 import grizzled.slf4j.Logging
 import org.eknet.publet.vfs.util.ByteSize
 import org.eknet.publet.sharry.lib.Entry
-import java.text.DateFormat
 import org.apache.commons.fileupload.FileItem
 import org.eknet.publet.sharry.SharryService.{AddResponse, AddRequest}
 import org.eknet.publet.auth.store.{DefaultAuthStore, UserProperty}
@@ -36,7 +35,7 @@ class UploadHandler extends ScalaScript with Logging {
   def serve() = {
     val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
     if (uploads.isEmpty) {
-      makeJson(Map("success" -> false, "message" -> "No files given."))
+      makeFailure("No files given.")
     } else {
       param("forAlias") match {
         case Some(alias) => anonymousUpload(alias, uploads)
@@ -101,24 +100,21 @@ class UploadHandler extends ScalaScript with Logging {
       new String(resp.password),
       untilDateString(resp.archive))
 
-  private def authenticatedUpload(uploads: Iterable[Entry]) = {
-    if (!Security.isAuthenticated) {
-      makeJson(Map("success"->false, "message" -> "Not authorized."))
-    } else {
-      import org.eknet.publet.sharry.lib.Timeout._
-      val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
-      val timeout = longParam("timeout").filter(_ > 0).map(_.days)
-      val req = AddRequest(
-        files = uploads,
-        password = param("password").map(_.toCharArray).getOrElse(Array()),
-        owner = Security.username,
-        timeout = timeout,
-        filename = param("name")
-      )
-      val resp = sharry.addFiles(req)
-      resp.fold(failure, success)
-    }
+  private def authenticatedUpload(uploads: Iterable[Entry]) = asSharryUser {
+    import org.eknet.publet.sharry.lib.Timeout._
+    val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
+    val timeout = longParam("timeout").filter(_ > 0).map(_.days)
+    val req = AddRequest(
+      files = uploads,
+      password = param("password").map(_.toCharArray).getOrElse(Array()),
+      owner = Security.username,
+      timeout = timeout,
+      filename = param("name")
+    )
+    val resp = sharry.addFiles(req)
+    resp.fold(failure, success)
   }
+
   case class FileItemEntry(i: FileItem) extends Entry {
     def name = i.getName
     def inputStream = i.getInputStream
