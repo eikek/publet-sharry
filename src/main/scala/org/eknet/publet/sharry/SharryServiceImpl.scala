@@ -75,6 +75,18 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
 
   def decryptFile(name: FileName, password: String, out: OutputStream) {
     sharry.decryptFile(name, password, out)
+    withTx {
+      singleVertex(filenameProp := name.fullName) map { v =>
+        val c = v.get[Long]("decryptCount").getOrElse(0L)
+        v.setProperty("decryptCount", c+1)
+      }
+    }
+  }
+
+  def clickCount(name: FileName) = withTx {
+    singleVertex(filenameProp := name.fullName) flatMap { v =>
+      v.get[Long]("decryptCount")
+    } getOrElse(0L)
   }
 
   def findArchive(name: String): Option[ArchiveInfo] = {

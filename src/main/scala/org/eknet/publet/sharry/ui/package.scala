@@ -36,6 +36,14 @@ import org.eknet.publet.auth.store.UserProperty
  */
 package object ui extends MailSupport {
 
+  def wrapException[A](body: => A) = {
+    try {
+      Right(body)
+    } catch {
+      case e:Exception => Left(e)
+    }
+  }
+
   def param(name: String) = PubletWebContext.param(name).filter(!_.isEmpty)
   def longParam(name: String) = param(name).map(_.toLong)
   def boolParam(name: String) = param(name) match {
@@ -55,10 +63,10 @@ package object ui extends MailSupport {
   def sendMails(from: String, tos: String, subject: String, text: String): Either[Exception, String] = {
     def isValid(str: String) = str != null && !str.isEmpty
     import collection.JavaConversions._
-    if (mailSession.getSmtpHost.isEmpty || !isValid(from) || !isValid(tos) || !isValid(subject)) {
-      Left(new IllegalArgumentException("To less arguments for sending mail."))
-    } else {
-      try {
+    wrapException {
+      if (mailSession.getSmtpHost.isEmpty || !isValid(from) || !isValid(tos) || !isValid(subject)) {
+        throw new IllegalArgumentException("To less arguments for sending mail.")
+      } else {
         Splitter.on(',').trimResults().omitEmptyStrings().split(tos).foreach { receiver =>
           newMail(from)
             .to(receiver)
@@ -66,12 +74,13 @@ package object ui extends MailSupport {
             .text(text)
             .send()
         }
-        Right("Mails sent")
-      } catch {
-        case e: Exception => Left(e)
+        "Mails sent"
       }
     }
   }
+
+  def uploadUrl(aliasName: String) =  PubletWebContext.urlOf(sharryPath / "upload" / aliasName)
+  def downloadUrl(fileId: String) =  PubletWebContext.urlOf(sharryPath / "download" / fileId)
 
   def fileName2Map(name: FileName) = Map(
     "size" -> name.size,
@@ -92,14 +101,15 @@ package object ui extends MailSupport {
     "givenName" -> ai.name,
     "sender" -> ai.sender,
     "senderIsOwner" -> (ai.sender == ai.archive.owner),
-    "url" -> PubletWebContext.urlOf(sharryPath / "download" / ai.id)
+    "clickCount" -> sharry.clickCount(ai.archive),
+    "url" -> downloadUrl(ai.id)
   )
 
   def addResponse2Map(resp: AddResponse) = fileName2Map(resp.archive) ++ Map(
     "id" -> resp.id,
     "givenName" -> resp.filename,
     "password" -> new String(resp.password),
-    "url" -> PubletWebContext.urlOf(sharryPath / "download" / resp.id)
+    "url" -> downloadUrl(resp.id)
   )
 
   def aliasToMap(a: Alias) = Map(
@@ -108,7 +118,7 @@ package object ui extends MailSupport {
     "timeout" -> a.timeout.map(_.days.toInt).getOrElse(-1),
     "enabled" -> a.enabled,
     "notification" -> a.notification,
-    "url" -> PubletWebContext.urlOf(sharryPath / "upload" / a.name)
+    "url" -> uploadUrl(a.name)
   )
 
   def mailSession = PubletWeb.instance[MailSessionFactory].get

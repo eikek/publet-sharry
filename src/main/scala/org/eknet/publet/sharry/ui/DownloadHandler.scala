@@ -46,13 +46,8 @@ class DownloadHandler(val name: ResourceName) extends ContentResource with Custo
         resp.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+convertName(ai.name)+"."+fn.ext)
 
         val os = resp.getOutputStream
-        try {
-          sharry.decryptFile(fn, pw, os)
-        } catch {
-          case e: Exception => {
-            error("Error getting file!", e)
-          }
-        }
+        wrapException { sharry.decryptFile(fn, pw, os) }
+          .fold(error("Error getting file!", _), identity)
       }
       case _ => ErrorResponse.notFound.send(req, resp)
     }

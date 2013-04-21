@@ -19,8 +19,8 @@ assetGroups: publet-sharry.assets
 
 - if (info.isEmpty) {
   .alert.alert-error
-    :markdown
-      **Bad Request** There is no information available what to download.
+    strong Error:
+    | The download is not available.
 
 - } else {
   - val format = DateFormat.getDateInstance(DateFormat.LONG, PubletWebContext.getLocale)

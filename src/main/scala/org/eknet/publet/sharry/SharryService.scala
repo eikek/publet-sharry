@@ -30,6 +30,8 @@ trait SharryService {
 
   def decryptFile(name: FileName, password: String, out: OutputStream)
 
+  def clickCount(name: FileName): Long
+
   def removeFiles(filter: ArchiveInfo => Boolean): Int
 
   def findArchive(name: String): Option[ArchiveInfo]

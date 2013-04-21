@@ -37,6 +37,7 @@
       '    <th>Valid Until</th>' +
       '    <th>Size</th>' +
       '    <th>Sender</th>' +
+      '    <th>DL</th>' +
       '  </tr>' +
       '</thead><tbody>' +
       '{{#archives}}' +
@@ -54,6 +55,7 @@
       '  <td>{{validUntilDate}}</td>' +
       '  <td>{{sizeString}}</td>' +
       '  <td>{{sender}}</td>' +
+      '  <td>{{clickCount}}</td>' +
       '</tr>' +
       '{{/archives}}' +
       '</tbody></table>' +
