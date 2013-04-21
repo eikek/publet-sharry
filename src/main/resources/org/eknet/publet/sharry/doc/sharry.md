@@ -37,10 +37,15 @@ If spam starts to occur, the alias page can be deleted or disabled.
 
 ### Configuration
 
+
+#### Mounting
+
 The resources are mounted by default to the path `/sharry`. This can be changed by
 adding a custom one to `publet.properties` configuration file:
 
     sharry.path=/another/path/to/sharry
+
+#### Maximum Size
 
 The maximum size allowed to store the archives can be configured using this property:
 
@@ -48,6 +53,15 @@ The maximum size allowed to store the archives can be configured using this prop
 
 The size is given using a number followed by a unit. The unit may be one of: `bytes`,
 `kib`, `mib` or `gib`. The case does not matter.
+
+#### Maximum Upload Size
+
+One upload is restricted to a certain size. It is by default `100MiB` and can be
+adjusted in `publet.properties`:
+
+    sharry.maxUploadSize=200MiB
+
+The size string must be in same format as described above.
 
 ### Usage
 

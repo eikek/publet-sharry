@@ -80,7 +80,11 @@
       $this.unmask();
       var fileupload = $this.find('.sharryUploadDoneOk');
       if (data.result.success === false) {
-        fileupload.html('<p class="alert alert-error"><strong>Error</strong> '+data.result.message+'</p>');
+        fileupload.html(Mustache.render(uploadFailedTemplate, data.result));
+        fileupload.find('.newUploadButton').click(function(e) {
+          fu.fileupload("destroy");
+          renderUpload($this, settings);
+        });
       } else {
         if (settings.forAlias) {
           fileupload.html(Mustache.render(uploadOkAnonymousTemplate, data.result));
@@ -256,6 +260,10 @@
       '   <a class="btn btn-success newUploadButton" href="#"><i class="icon-repeat icon-white"></i> New Upload</a> ' +
       '  </p>' +
       '</div>';
+  var uploadFailedTemplate =
+      '<p class="alert alert-error"><strong>Error</strong> {{message}}</p>'+
+      '<div><a class="btn btn-success newUploadButton" href="#"><i class="icon-repeat icon-white"></i> New Upload</a></div> ';
+
   var uploadOkAnonymousTemplate =
       '<div class="well">' +
       '  <h2>"{{givenName}}" successfully uploaded!</h2><br/>'+

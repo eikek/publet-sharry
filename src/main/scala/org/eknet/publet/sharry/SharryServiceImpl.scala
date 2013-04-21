@@ -35,7 +35,7 @@ import org.eknet.scue.GraphDsl
  */
 @Singleton
 class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
-                                   @Named("maxSharryFolderSize") maxSize: Long,
+                                   @Named("sharry.maxFolderSize") maxSize: Long,
                                    @Named("sharry-db") db: GraphDb) extends SharryService with GraphDsl {
 
   private implicit val graph = db.graph
@@ -101,7 +101,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     counter.get()
   }
 
-  def listArchives = sharry.listFiles.map(_.fullName).flatMap(findArchive)
+  def listArchives = sharry.listFiles.map(_.fullName).flatMap(findArchive).toList.sortBy(- _.archive.time)
 
   private def saveResponse(resp: AddResponse) {
     withTx {

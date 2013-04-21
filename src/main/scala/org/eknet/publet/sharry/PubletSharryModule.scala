@@ -31,7 +31,8 @@ import org.eknet.publet.auth.store.{UserStore, PermissionStore}
 
 class PubletSharryModule extends AbstractPubletModule with PubletBinding with PubletModule with Logging {
 
-  private val defaultFolderSize = ByteSize.mib.toBytes(200)
+  private val defaultFolderSize = ByteSize.mib.toBytes(500)
+  private val defaultMaxUploadSize = ByteSize.mib.toBytes(100)
 
   def configure() {
     bind[PubletSharrySetup].asEagerSingleton()
@@ -55,10 +56,16 @@ class PubletSharryModule extends AbstractPubletModule with PubletBinding with Pu
   @Provides@Named("sharryFolder")
   def bindFolder(config: Config): JPath = config.workDir("sharry-folder").toPath
 
-  @Provides@Named("maxSharryFolderSize")
+  @Provides@Named("sharry.maxFolderSize")
   def bindFolderSize(config: Config): Long = config("sharry.maxFolderSize") match {
     case Some(x) => parseSize(x).getOrElse(defaultFolderSize)
     case None => defaultFolderSize
+  }
+
+  @Provides@Named("sharry.maxUploadSize")
+  def bindMaxUploaddSize(config: Config): Long = config("sharry.maxUploadSize") match {
+    case Some(x) => parseSize(x).getOrElse(defaultMaxUploadSize)
+    case _ => defaultMaxUploadSize
   }
 
   @Provides@Singleton@Named("sharry-db")

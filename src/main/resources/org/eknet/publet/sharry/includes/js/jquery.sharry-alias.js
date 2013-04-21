@@ -78,7 +78,7 @@
       '      <label>Timeout</label>' +
       '      <select name="timeout">'+
       '        <option value="1">1 day</option>'+
-      '        <option value="7" selected>1 week</option>'+
+      '        <option value="7">1 week</option>'+
       '        <option value="14">2 weeks</option>'+
       '        <option value="30">1 month</option>'+
       '        <option value="60">2 month</option>'+
@@ -103,6 +103,7 @@
   function render($this, settings) {
     $this.mask();
     $.get(settings.actionUrl, { "do": "list"}, function(data) {
+      $this.unmask();
       data.actionUrl = settings.actionUrl;
       $this.html(Mustache.render(template, data));
       $this.find('.addAliasForm').ajaxForm({
@@ -124,6 +125,8 @@
       });
       $this.find('.addAliasButton').click(function(e) {
         $this.find('.addAliasForm').clearForm();
+        $this.find('.addAliasForm input[type="checkbox"]').prop('checked', true);
+        $this.find('.addAliasForm option[value="14"]').prop('selected', true);
         $this.find('.readOnlyAlias .uneditable-input').text('generated randomly');
         $this.find('.modal').modal('toggle');
       });
@@ -172,8 +175,6 @@
           }
         });
       });
-
-      $this.unmask();
     });
   }
 

@@ -37,9 +37,14 @@ class UploadHandler extends ScalaScript with Logging {
     if (uploads.isEmpty) {
       makeFailure("No files given.")
     } else {
-      param("forAlias") match {
-        case Some(alias) => anonymousUpload(alias, uploads)
-        case _ => authenticatedUpload(uploads)
+      val size = PubletWebContext.uploads.foldLeft(0L)((s,t) => s+ t.getSize)
+      if (size > maxUploadSize) {
+        makeFailure("Maximum upload size ("+ ByteSize.bytes.normalizeString(maxUploadSize) +") exceeded!")
+      } else {
+        param("forAlias") match {
+          case Some(alias) => anonymousUpload(alias, uploads)
+          case _ => authenticatedUpload(uploads)
+        }
       }
     }
   }
@@ -121,4 +126,6 @@ class UploadHandler extends ScalaScript with Logging {
   }
 
   def authStore = PubletWeb.instance[DefaultAuthStore].get
+
+  def maxUploadSize = PubletWeb.instance[Long].named("sharry.maxUploadSize")
 }
