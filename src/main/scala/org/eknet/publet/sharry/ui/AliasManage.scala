@@ -18,11 +18,8 @@ package org.eknet.publet.sharry.ui
 
 import org.eknet.publet.engine.scala.ScalaScript
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.web.util.PubletWebContext
-import org.eknet.publet.sharry.{RandomId, SharryServiceImpl}
 import org.eknet.publet.sharry.lib.Timeout
 import org.eknet.publet.sharry.SharryService.Alias
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

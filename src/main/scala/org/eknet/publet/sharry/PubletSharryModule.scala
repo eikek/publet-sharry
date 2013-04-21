@@ -20,12 +20,11 @@ import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBin
 import org.eknet.publet.web.Config
 import java.nio.file.{Path => JPath}
 import com.google.inject.{Scopes, Singleton, Provides}
-import org.eknet.publet.vfs.util.{UrlResource, ByteSize}
+import org.eknet.publet.vfs.util.ByteSize
 import com.google.inject.name.Named
 import grizzled.slf4j.Logging
 import org.eknet.publet.ext.graphdb.GraphDbProvider
 import org.eknet.publet.vfs.{Resource, Path}
-import org.eknet.publet.web.util.Key
 import org.eknet.publet.sharry.test.TestUserStore
 import org.eknet.publet.auth.store.{UserStore, PermissionStore}
 

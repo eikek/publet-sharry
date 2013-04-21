@@ -20,15 +20,12 @@ import org.eknet.publet.sharry.lib.{Timeout, FileName, Sharry, SharryImpl}
 import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import java.nio.file.{Files, Path}
-import org.eknet.publet.ext.graphdb.{BlueprintGraph, GraphDb}
+import org.eknet.publet.ext.graphdb.GraphDb
 import org.eknet.publet.sharry.SharryService.{Alias, ArchiveInfo, AddResponse, AddRequest}
-import java.security.SecureRandom
-import com.tinkerpop.blueprints.{Direction, Vertex}
-import java.util.UUID
+import com.tinkerpop.blueprints.Vertex
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicInteger
 import org.eknet.scue.GraphDsl
-import scala.annotation.tailrec
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com

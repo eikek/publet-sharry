@@ -31,10 +31,12 @@ import org.eknet.publet.sharry.SharryService.ArchiveInfo
 class FileDeleteJob(sharry: SharryService) extends QuartzJob with Logging {
 
   def perform(context: JobExecutionContext) {
+    debug("Sharry file delete job starting...")
     val nofiles = sharry.removeFiles(FileName.outdated)
     if (nofiles > 0) {
       info("Removed "+ nofiles +" shared files")
     }
+    debug("Sharry file delete job done.")
   }
 
   implicit def toFilter(f: FileName => Boolean): ArchiveInfo => Boolean = ai => f(ai.archive)

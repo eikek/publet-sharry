@@ -17,7 +17,6 @@
 package org.eknet.publet.sharry.ui
 
 import org.eknet.publet.web.{ReqUtils, CustomContent, ErrorResponse}
-import org.eknet.publet.sharry.lib.FileName
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import org.eknet.publet.vfs.{ResourceName, ContentResource, ContentType}
 import com.google.common.net.HttpHeaders

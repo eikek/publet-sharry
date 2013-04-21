@@ -22,8 +22,7 @@ import org.eknet.publet.vfs.Path
 import org.eknet.publet.Publet
 import org.eknet.publet.web.req.{SuperFilter, RequestHandlerFactory}
 import javax.servlet.http.HttpServletRequest
-import org.eknet.publet.web.{PubletRequestWrapper, ReqUtils}
-import javax.servlet.{FilterConfig, FilterChain, ServletResponse, ServletRequest, Filter}
+import org.eknet.publet.web.ReqUtils
 import org.eknet.publet.web.filter.Filters
 
 /**

@@ -27,7 +27,6 @@ import java.text.DateFormat
 import org.eknet.publet.sharry.SharryService.{Alias, AddResponse, ArchiveInfo}
 import org.eknet.publet.vfs.{Content, Path}
 import org.eknet.publet.web.shiro.Security
-import org.eknet.publet.auth.store.UserProperty
 
 /**
  *
