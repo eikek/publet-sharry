@@ -28,6 +28,7 @@ import java.util.UUID
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicInteger
 import org.eknet.scue.GraphDsl
+import scala.annotation.tailrec
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -54,6 +55,13 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     }
   }
 
+  private final def nextId(generator: String):String = withTx {
+    val ids = vertex("id-generator" := generator)
+    val next = RandomId.stream(4, 15).find(id => (ids ->- id).ends.isEmpty).get
+    ids --> next --> newVertex
+    next
+  }
+
   def addFiles(request: AddRequest) = {
     val req = request.password match {
       case pw if (pw.length==0) => request.copy(password = RandomId.generatePassword(18))
@@ -63,7 +71,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       archive = fn,
       filename = req.filename.getOrElse(fn.checksum.take(10)+"."+fn.ext),
       password = req.password,
-      id = RandomId.generate(10, 15),
+      id = nextId(uniqueIdProp),
       sender = req.sender.getOrElse(fn.owner)
     )
     val resp = sharry.addFiles(req.files, req.owner, req.password, req.timeout)
@@ -155,8 +163,12 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     )
   }
 
-  def updateAlias(login: String, alias: Alias) {
+  def updateAlias(login: String, a: Alias) {
     withTx {
+      val alias = a match {
+        case v if (v.name.isEmpty) => a.copy(name = nextId(aliasProp))
+        case v => v
+      }
       val vlogin = vertex(loginProp := login)
       val valias = vertex(aliasProp := alias.name, v => {
         vlogin --> "alias" --> v

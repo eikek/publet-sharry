@@ -27,22 +27,31 @@ object RandomId {
   private val counter = new AtomicInteger(0)
   private val chars = List('-') ::: ('a' to 'z').toList ::: ('A' to 'Z').toList ::: ('0' to '9').toList
   private val random = new SecureRandom()
-  private val reseedInterval = 1000
+  private val reseedInterval = 3000
 
-  def generatePassword(len: Int) = {
+  private def nextInt(n: Int) = {
     if (counter.incrementAndGet() > reseedInterval) {
       counter.set(0)
       random.setSeed(random.generateSeed(16))
     }
-    val pw = for (i <- 1 to len) yield chars(random.nextInt(chars.size))
+    random.nextInt(n)
+  }
+
+  def generatePassword(len: Int) = {
+    val pw = for (i <- 1 to len) yield chars(nextInt(chars.size))
     pw.toArray
   }
 
+  def generate(len: Int): String = new String(generatePassword(len))
+
   def generate(minLen: Int, maxLen: Int): String = {
-    val len = if (minLen == maxLen) minLen else random.nextInt(maxLen-minLen) + minLen
+    val len = if (minLen == maxLen) minLen else nextInt(maxLen-minLen) + minLen
     generate(len)
   }
 
-  def generate(len: Int): String = new String(generatePassword(len))
+  def stream(minLen: Int, maxLen: Int): Stream[String] =
+    generate(minLen, maxLen) #:: stream(minLen, maxLen)
+
+  def stream(len: Int): Stream[String] = generate(len) #:: stream(len)
 
 }

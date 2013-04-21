@@ -63,7 +63,7 @@ object SharryService {
 
   case class ArchiveInfo(archive: FileName, name: String, id: String, sender: String)
 
-  case class Alias(name: String,
+  case class Alias(name: String = "",
                    enabled: Boolean = true,
                    defaultPassword: Array[Char] = Array(),
                    timeout: Option[Timeout] = None,

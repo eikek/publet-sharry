@@ -67,7 +67,7 @@ class AliasManage extends ScalaScript {
 
   private def aliasFromParams() = {
     import Timeout._
-    val aliasName = param("aliasName").getOrElse(RandomId.generate(8,12))
+    val aliasName = param("aliasName").getOrElse("")
     val timeout = longParam("timeout").getOrElse(14L).days
     val defaultPassw = param("defaultPassword").map(_.toCharArray).getOrElse(Array[Char]())
     val enabled = boolParam("enabled")
