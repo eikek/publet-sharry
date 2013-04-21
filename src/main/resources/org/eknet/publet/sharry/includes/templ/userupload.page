@@ -9,6 +9,9 @@ assetGroups: publet-sharry.assets
   .loadmask {
     background: #eee;
   }
+  .smallLink {
+    font-size: x-small;
+  }
 :&javascript
   $(function() {
     $('#userUpload').sharry({
@@ -27,6 +30,10 @@ assetGroups: publet-sharry.assets
   h1
     | »Sharry«
     small Safely share files
+    .pull-right
+      a.smallLink(href="https://eknet.org/gitr/?r=eike/publet-sharry")
+        i.icon-share-alt
+        | sharry project
 
 - if (username.isEmpty) {
   .row

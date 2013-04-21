@@ -3,7 +3,10 @@ title: Publet Sharry - Download
 assetGroups: publet-sharry.assets
 
 --- name:head pipeline:jade
-
+:css
+  .smallLink {
+    font-size: x-small;
+  }
 --- name:content pipeline:jade
 - import org.eknet.publet.sharry._
 - import java.text.DateFormat
@@ -16,6 +19,10 @@ assetGroups: publet-sharry.assets
   h1
     | »Sharry«
     small Safely share files
+    .pull-right
+      a.smallLink(href="https://eknet.org/gitr/?r=eike/publet-sharry")
+        i.icon-share-alt
+        | sharry project
 
 - if (info.isEmpty) {
   .alert.alert-error
