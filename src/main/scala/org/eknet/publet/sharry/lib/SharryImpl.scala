@@ -29,7 +29,7 @@ import org.eknet.publet.vfs.util.ByteSize
  * @author Eike Kettner eike.kettner@gmail.com
  * @since 12.02.13 00:31
  */
-class SharryImpl(folder: Path, val folderSizeLimit: Long) extends Sharry with Logging {
+class SharryImpl(folder: Path, var folderSizeLimit: Long) extends Sharry with Logging {
 
   folder.ensureDirectories()
 

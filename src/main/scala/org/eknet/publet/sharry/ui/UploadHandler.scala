@@ -25,6 +25,7 @@ import org.eknet.publet.sharry.lib.Entry
 import org.apache.commons.fileupload.FileItem
 import org.eknet.publet.sharry.SharryService.{AddResponse, AddRequest}
 import org.eknet.publet.auth.store.{DefaultAuthStore, UserProperty}
+import org.eknet.publet.{sharry => psharry}
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -127,5 +128,5 @@ class UploadHandler extends ScalaScript with Logging {
 
   def authStore = PubletWeb.instance[DefaultAuthStore].get
 
-  def maxUploadSize = PubletWeb.instance[Long].named("sharry.maxUploadSize")
+  def maxUploadSize = psharry.maxUploadSize(config)
 }

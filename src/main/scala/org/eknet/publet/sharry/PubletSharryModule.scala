@@ -20,7 +20,6 @@ import org.eknet.publet.web.guice.{AbstractPubletModule, PubletModule, PubletBin
 import org.eknet.publet.web.Config
 import java.nio.file.{Path => JPath}
 import com.google.inject.{Scopes, Singleton, Provides}
-import org.eknet.publet.vfs.util.ByteSize
 import com.google.inject.name.Named
 import grizzled.slf4j.Logging
 import org.eknet.publet.ext.graphdb.GraphDbProvider
@@ -30,15 +29,14 @@ import org.eknet.publet.auth.store.{UserStore, PermissionStore}
 
 class PubletSharryModule extends AbstractPubletModule with PubletBinding with PubletModule with Logging {
 
-  private val defaultFolderSize = ByteSize.mib.toBytes(500)
-  private val defaultMaxUploadSize = ByteSize.mib.toBytes(100)
-
   def configure() {
     bind[PubletSharrySetup].asEagerSingleton()
     bind[SharryService].to[SharryServiceImpl]
     bindRequestHandler.add[SharryDownloadFilter]
     bindRequestHandler.add[SharryUserUploadFilter]
     bindRequestHandler.add[OpenScriptHandler]
+
+    bind[SharryServiceMBeanImpl].asEagerSingleton()
 
     bindDocumentation(List(doc("sharry.md")))
 
@@ -55,35 +53,9 @@ class PubletSharryModule extends AbstractPubletModule with PubletBinding with Pu
   @Provides@Named("sharryFolder")
   def bindFolder(config: Config): JPath = config.workDir("sharry-folder").toPath
 
-  @Provides@Named("sharry.maxFolderSize")
-  def bindFolderSize(config: Config): Long = config("sharry.maxFolderSize") match {
-    case Some(x) => parseSize(x).getOrElse(defaultFolderSize)
-    case None => defaultFolderSize
-  }
-
-  @Provides@Named("sharry.maxUploadSize")
-  def bindMaxUploaddSize(config: Config): Long = config("sharry.maxUploadSize") match {
-    case Some(x) => parseSize(x).getOrElse(defaultMaxUploadSize)
-    case _ => defaultMaxUploadSize
-  }
-
   @Provides@Singleton@Named("sharry-db")
   def sharryDb(dbprovider: GraphDbProvider) = {
     dbprovider.getDatabase("sharry-db")
-  }
-
-  private[this] def parseSize(size: String) = {
-    val sizeRegex = """((\d+)(\.\d+)?)(.*)""".r
-    size match {
-      case sizeRegex(num, i, p, unit) => {
-        if (unit.isEmpty) Some(i.toLong)
-        else Some(ByteSize.fromString(unit).toBytes(num.toDouble))
-      }
-      case _ => {
-        warn("Cannot parse folder size string: "+ size+ "! Using default.")
-        None
-      }
-    }
   }
 
   val name = "Sharry"

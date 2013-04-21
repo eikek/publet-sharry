@@ -26,6 +26,8 @@ import com.tinkerpop.blueprints.Vertex
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicInteger
 import org.eknet.scue.GraphDsl
+import org.eknet.publet.web.{ConfigReloadedEvent, Config}
+import com.google.common.eventbus.Subscribe
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -33,12 +35,12 @@ import org.eknet.scue.GraphDsl
  */
 @Singleton
 class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
-                                   @Named("sharry.maxFolderSize") maxSize: Long,
+                                   config: Config,
                                    @Named("sharry-db") db: GraphDb) extends SharryService with GraphDsl {
 
   private implicit val graph = db.graph
 
-  private val sharry: Sharry = new SharryImpl(folder, maxSize)
+  val sharry = new SharryImpl(folder, maxSize(config))
   private val filenameProp = "sharry-lib-filename"
   private val uniqueIdProp = "sharry-unique-id"
   private val loginProp = "sharry-username"
@@ -57,6 +59,11 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     val next = RandomId.stream(4, 15).find(id => (ids ->- id).ends.isEmpty).get
     ids --> next --> newVertex
     next
+  }
+
+  @Subscribe
+  def resetFolderSize(e: ConfigReloadedEvent) {
+    sharry.folderSizeLimit = maxSize(config)
   }
 
   def addFiles(request: AddRequest) = {

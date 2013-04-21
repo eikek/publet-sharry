@@ -21,6 +21,7 @@ import org.quartz.JobExecutionContext
 import grizzled.slf4j.Logging
 import org.eknet.publet.sharry.lib.FileName
 import org.eknet.publet.sharry.SharryService.ArchiveInfo
+import com.google.inject.Inject
 
 /**
  *
@@ -28,15 +29,11 @@ import org.eknet.publet.sharry.SharryService.ArchiveInfo
  * @since 12.02.13 08:15
  * 
  */
-class FileDeleteJob(sharry: SharryService) extends QuartzJob with Logging {
+class FileDeleteJob @Inject() (sharry: SharryService) extends QuartzJob with Logging {
 
   def perform(context: JobExecutionContext) {
-    debug("Sharry file delete job starting...")
     val nofiles = sharry.removeFiles(FileName.outdated)
-    if (nofiles > 0) {
-      info("Removed "+ nofiles +" shared files")
-    }
-    debug("Sharry file delete job done.")
+    info("Removed "+ nofiles +" shared files")
   }
 
   implicit def toFilter(f: FileName => Boolean): ArchiveInfo => Boolean = ai => f(ai.archive)

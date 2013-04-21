@@ -31,9 +31,10 @@ import org.eknet.publet.web.scripts.WebScriptResource
 import org.eknet.publet.sharry.ui.{AliasManage, ArchiveManage, MailSender, DownloadHandler, UploadHandler}
 import org.eknet.publet.webeditor.{Assets => EditorAssets}
 import com.google.inject.name.Named
+import org.eknet.publet.web.{ConfigReloadedEvent, Config}
 
 @Singleton
-class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, scheduler: Scheduler, @Named("sharryPath") path: Path) extends AssetCollection with QuartzDsl {
+class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, scheduler: Scheduler, @Named("sharryPath") path: Path, config: Config) extends AssetCollection with QuartzDsl {
 
   override def classPathBase = "/org/eknet/publet/sharry/includes"
 
@@ -67,20 +68,24 @@ class PubletSharrySetup @Inject() (publet: Publet, assetMgr: AssetManager, sched
     publet.mountManager.mount(path / "open", open)
   }
 
-  @Subscribe
-  def scheduleDeletionJob(ev: PubletStartedEvent) {
-    val jobdef = newJob[FileDeleteJob]
-      .withIdentity("file-delete" in "sharry")
-      .withDescription("Removes outdated shared files")
-      .build()
-    val trigger = newTrigger
+  private def createTrigger = {
+    val interval = config("sharry.deleteJobInterval").map(_.toInt).getOrElse(24)
+    newTrigger
       .withIdentity("daily-file-delete" in "sharry")
       .forJob(jobdef)
-      .withSchedule(simpleSchedule.withIntervalInHours(24).repeatForever())
+      .withSchedule(simpleSchedule.withIntervalInHours(interval).repeatForever())
       .startAt(DateBuilder.futureDate(2, IntervalUnit.HOUR))
       .build()
+  }
 
-    scheduler.scheduleJob(jobdef, trigger)
+  @Subscribe
+  def scheduleDeletionJob(ev: PubletStartedEvent) {
+    scheduler.scheduleJob(jobdef, createTrigger)
+  }
+
+  @Subscribe
+  def rescheduleJob(e: ConfigReloadedEvent) {
+    scheduler.rescheduleJob("daily-file-delete" in "sharry", createTrigger)
   }
 
   private object Assets extends AssetCollection {

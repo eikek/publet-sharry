@@ -52,7 +52,8 @@ The maximum size allowed to store the archives can be configured using this prop
     sharry.maxFolderSize=500MiB
 
 The size is given using a number followed by a unit. The unit may be one of: `bytes`,
-`kib`, `mib` or `gib`. The case does not matter.
+`kib`, `mib` or `gib`. The case does not matter. You can change the property and
+reload the config to set a new value without application restart.
 
 #### Maximum Upload Size
 
@@ -61,7 +62,20 @@ adjusted in `publet.properties`:
 
     sharry.maxUploadSize=200MiB
 
-The size string must be in same format as described above.
+The size string must be in same format as described above. You can change the property
+and reload the config to set a new value without application restart.
+
+#### Delete Job
+
+A job is scheduled on publet startup that will look through all archives and deletes
+those that have expired. The job is by default scheduled to run every 24 hours. The
+interval can be changed in `publet.properties`:
+
+    sharry.deleteJobInterval=12
+
+The value is the number of hours to wait until the next run of the job. If you change
+and reload the config file, the job is re-scheduled.
+
 
 ### Usage
 
