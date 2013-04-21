@@ -19,9 +19,7 @@ package org.eknet.publet
 import org.eknet.publet.web.util.Key
 import org.eknet.publet.vfs.util.ByteSize
 import grizzled.slf4j.Logging
-import org.eknet.publet.sharry.ui._
 import scala.Some
-import org.eknet.publet.sharry
 import org.eknet.publet.web.Config
 import org.eknet.publet.quartz.QuartzDsl
 

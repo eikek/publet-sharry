@@ -64,8 +64,6 @@ object Dependencies {
     "org.slf4j" % "slf4j-simple" % Version.slf4j
   ) map (_ % "test")
 
-  val servletApi = "javax.servlet" % "javax.servlet-api" % Version.servlet
-  val servletApiProvided = servletApi % "provided"
 }
 
 // Root Module 
@@ -88,11 +86,21 @@ object RootBuild extends Build {
     )
   ) dependsOn (root)
 
+  val exludedFiles = Set(
+    "javax.servlet-3.0.0.v201112011016.jar"
+  )
+  def isExcluded(n: String) = exludedFiles contains (n)
+
+  val deps = Seq(publetAppPlugin, publetQuartzPlugin) ++ providedDeps ++ testDeps
+
   val buildSettings = Project.defaultSettings ++ assemblySettings ++ ReflectPlugin.allSettings ++ Seq(
     name := "publet-sharry",
     ReflectPlugin.reflectPackage := "org.eknet.publet.sharry",
     sourceGenerators in Compile <+= ReflectPlugin.reflect,
     assembleArtifact in packageScala := false,
+    excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
+      cp filter { f => isExcluded(f.data.getName) }
+    },
     libraryDependencies ++= deps
   ) ++ PubletPlugin.publetSettings
 
@@ -116,8 +124,6 @@ object RootBuild extends Build {
        </dependency>
 
   )
-
-  val deps = Seq(publetAppPlugin, publetQuartzPlugin) ++ providedDeps ++ testDeps
 }
 
 
