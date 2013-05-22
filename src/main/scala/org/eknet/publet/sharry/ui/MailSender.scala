@@ -44,5 +44,5 @@ class MailSender extends ScalaScript {
     makeFailure(e.getMessage)
   }
 
-  def getFromMail = Security.user.flatMap(_.get(UserProperty.email)).orElse(config("sharry.from"))
+  def getFromMail = config("sharry.from")
 }
