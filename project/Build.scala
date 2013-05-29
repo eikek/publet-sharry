@@ -30,11 +30,11 @@ object Version {
   val bouncyCastle = "1.46"
   val slf4j = "1.7.2"
   val logback = "1.0.9"
-  val scalaTest = "2.0.M6-SNAP3"
+  val scalaTest = "1.9.1"
   val grizzled = "0.6.9"
   val scala = "2.9.2"
   val servlet = "3.0.1"
-  val publet = "1.1.0"
+  val publet = "1.2.0"
   val scue = "0.2.0"
 }
 
@@ -105,7 +105,7 @@ object RootBuild extends Build {
   ) ++ PubletPlugin.publetSettings
 
   override lazy val settings = super.settings ++ Seq(
-    version := "0.1.0-SNAPSHOT",
+    version := "0.1.0",
     organization := "org.eknet.publet",
     licenses := Seq(("ASL2", new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))),
     scmInfo := Some(ScmInfo(new URL("https://eknet.org/gitr/?r=eike/publet-sharry.git"), "scm:git:https://eknet.org/git/eike/publet-sharry.git")),
