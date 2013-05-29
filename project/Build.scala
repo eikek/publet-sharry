@@ -105,7 +105,7 @@ object RootBuild extends Build {
   ) ++ PubletPlugin.publetSettings
 
   override lazy val settings = super.settings ++ Seq(
-    version := "0.1.0",
+    version := "0.2.0-SNAPSHOT",
     organization := "org.eknet.publet",
     licenses := Seq(("ASL2", new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))),
     scmInfo := Some(ScmInfo(new URL("https://eknet.org/gitr/?r=eike/publet-sharry.git"), "scm:git:https://eknet.org/git/eike/publet-sharry.git")),
