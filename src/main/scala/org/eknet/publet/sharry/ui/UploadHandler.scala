@@ -108,7 +108,6 @@ class UploadHandler extends ScalaScript with Logging {
 
   private def authenticatedUpload(uploads: Iterable[Entry]) = asSharryUser {
     import org.eknet.publet.sharry.lib.Timeout._
-    val uploads = PubletWebContext.uploads.map { FileItemEntry.apply }
     val timeout = longParam("timeout").filter(_ > 0).map(_.days)
     val req = AddRequest(
       files = uploads,

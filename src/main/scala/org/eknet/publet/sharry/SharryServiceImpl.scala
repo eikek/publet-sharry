@@ -73,7 +73,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
     }
     def createResponse(req: AddRequest, fn: FileName) = AddResponse(
       archive = fn,
-      filename = req.filename.getOrElse(fn.checksum.take(10)+"."+fn.ext),
+      filename = req.filename.getOrElse(fn.checksum.take(10)),
       password = req.password,
       id = nextId(uniqueIdProp),
       sender = req.sender.getOrElse(fn.owner)

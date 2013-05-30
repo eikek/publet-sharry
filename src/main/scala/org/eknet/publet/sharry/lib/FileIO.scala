@@ -48,17 +48,35 @@ object FileIO {
    * Zips the given directory into a single zip file next to the directory. The
    * directory will be deleted afterwards.
    *
+   * If the directory contains exactly one file with extension `zip`, it is just
+   * moved.
+   *
    * @param directory the directory to zip
    * @return the path to the zip file (sibling to the directory)
    */
   def zipDir(directory: Path): Path = {
     val zipfile = directory.getParent / (directory.getFileName.toString + ".zip")
     val zipout = new ZipOutputStream(zipfile.getOutput(StandardOpenOption.CREATE_NEW))
-    zipout.exec {
-      directory.visitFiles(addZipEntry(zipout, _))
+    findSingle(directory, "*.zip") match {
+      case Some(zipf) => zipf.moveTo(zipfile, StandardCopyOption.REPLACE_EXISTING)
+      case _ => {
+        zipout.exec {
+          directory.visitFiles(addZipEntry(zipout, _))
+        }
+      }
     }
     directory.deleteTree()
     zipfile
+  }
+
+  private def findSingle(directory: Path, glob: String) = {
+    val iter = directory.list(glob).iterator
+    if (iter.hasNext) {
+      val f = iter.next()
+      if (iter.hasNext) None else Some(f)
+    } else {
+      None
+    }
   }
 
   def zipToDir(files: Iterable[Entry], zipFile: Path) {
