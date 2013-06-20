@@ -53,19 +53,19 @@ object SharryService {
 
   case class AddRequest(files: Iterable[Entry],
                         owner: String,
-                        password: Array[Char] = Array(),
+                        password: String = "",
                         timeout: Option[Timeout] = None,
                         filename: Option[String] = None,
                         sender: Option[String] = None)
 
 
-  case class AddResponse(id: String, archive: FileName, filename: String, password: Array[Char], sender: String)
+  case class AddResponse(id: String, archive: FileName, filename: String, password: String, sender: String)
 
   case class ArchiveInfo(archive: FileName, name: String, id: String, sender: String)
 
   case class Alias(name: String = "",
                    enabled: Boolean = true,
-                   defaultPassword: Array[Char] = Array(),
+                   defaultPassword: String = "",
                    timeout: Option[Timeout] = None,
                    notification: Boolean = true)
 }

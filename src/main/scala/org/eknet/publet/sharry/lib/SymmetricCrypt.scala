@@ -18,8 +18,8 @@ package org.eknet.publet.sharry.lib
 
 import java.nio.file.{StandardOpenOption, Path}
 import java.io.{OutputStream, InputStream}
-import javax.crypto.{CipherInputStream, Cipher, CipherOutputStream}
-import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
+import javax.crypto.{SecretKeyFactory, CipherInputStream, Cipher, CipherOutputStream}
+import javax.crypto.spec.{PBEKeySpec, IvParameterSpec, SecretKeySpec}
 import com.google.common.io.ByteStreams
 import com.google.common.hash.Hashing
 import java.security.SecureRandom
@@ -40,7 +40,12 @@ object SymmetricCrypt {
 
   def hashString(name: CharSequence) = Hashing.sha256().hashString(name).asBytes()
 
-  def createKey(password: Array[Char]) = hashString(password).drop(5).take(16)
+  def createKey(password: String, salt: Array[Byte]) = {
+    val sfac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+    val ks = new PBEKeySpec(password.toCharArray, salt, math.pow(2, 16).toInt, 256)
+    val key = sfac.generateSecret(ks)
+    key.getEncoded
+  }
 
   /**
    * Encrypts the file at the given path and writes it to the specifed `target`
@@ -50,8 +55,8 @@ object SymmetricCrypt {
    * @param target
    * @param password
    */
-  def encrypt(source: Path, target: Path, password: Array[Char]) {
-    val key = createKey(password)
+  def encrypt(source: Path, target: Path, password: String, salt: Array[Byte]) {
+    val key = createKey(password, salt)
     val in = source.getInput()
     val out = target.getOutput(StandardOpenOption.CREATE_NEW)
     in.exec {
@@ -69,8 +74,8 @@ object SymmetricCrypt {
    * @param target
    * @param password
    */
-  def decrypt(source: Path, target: Path, password: Array[Char]) {
-    val key = createKey(password)
+  def decrypt(source: Path, target: Path, password: String, salt: Array[Byte]) {
+    val key = createKey(password, salt)
     val in = source.getInput()
     val out = target.getOutput(StandardOpenOption.CREATE_NEW)
     in.exec {
@@ -80,8 +85,8 @@ object SymmetricCrypt {
     }
   }
 
-  def decrypt(source: Path, target: OutputStream, password: Array[Char]) {
-    val key = createKey(password)
+  def decrypt(source: Path, target: OutputStream, password: String, salt: Array[Byte]) {
+    val key = createKey(password, salt)
     val in = source.getInput()
     in.exec {
       decrypt(in, target, key)

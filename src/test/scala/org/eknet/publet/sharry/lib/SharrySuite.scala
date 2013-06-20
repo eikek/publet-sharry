@@ -32,7 +32,7 @@ class SharrySuite extends FunSuite with ShouldMatchers {
     testfolder.ensureDirectories()
     testfolder.deleteTree()
     val sharry = new SharryImpl(testfolder, 1)
-    val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw".toCharArray, Some(2.seconds))
+    val result = sharry.addFiles(Seq(textfile1, textfile2), "eike", "testpw", Some(2.seconds))
 
     val name = result.fold(e => throw e, identity)
     val output = testfolder.resolve("testout.zip")

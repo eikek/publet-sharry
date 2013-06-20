@@ -115,7 +115,7 @@ object FileIO {
    */
   def storeAndEncryptFiles(items: Iterable[Entry], password: String, targetFile: Path) {
     val zip = zipDir(store(items))
-    SymmetricCrypt.encrypt(zip, targetFile, password.toCharArray)
+    SymmetricCrypt.encrypt(zip, targetFile, password, createSha(password))
     zip.deleteIfExists()
   }
 
@@ -128,7 +128,7 @@ object FileIO {
    */
   def decryptFile(encryptedFile: Path, password: String) = {
     val tempFile = Files.createTempFile("sharry-dec", ".zip")
-    SymmetricCrypt.decrypt(encryptedFile, tempFile, password.toCharArray)
+    SymmetricCrypt.decrypt(encryptedFile, tempFile, password, createSha(password))
     tempFile
   }
 

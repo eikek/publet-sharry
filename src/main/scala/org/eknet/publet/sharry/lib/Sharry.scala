@@ -35,7 +35,7 @@ trait Sharry {
    *                will be subject to deletion
    * @return
    */
-  def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]): Either[Exception, FileName]
+  def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Option[Timeout]): Either[Exception, FileName]
 
   /**
    * Looks up the encrypted archive.

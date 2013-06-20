@@ -68,7 +68,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
 
   def addFiles(request: AddRequest) = {
     val req = request.password match {
-      case pw if (pw.length==0) => request.copy(password = RandomId.generatePassword(18))
+      case pw if pw.length==0 => request.copy(password = RandomId.generate(18))
       case _ => request
     }
     def createResponse(req: AddRequest, fn: FileName) = AddResponse(
@@ -163,7 +163,7 @@ class SharryServiceImpl  @Inject()(@Named("sharryFolder") folder: Path,
       enabled = v.get[Boolean]("enabled").getOrElse(false),
       notification = v.get[Boolean]("notification").getOrElse(false),
       timeout = v.get[Long]("timeout").map(_.millis),
-      defaultPassword = v.get[String]("defaultPassword").getOrElse("").toCharArray
+      defaultPassword = v.get[String]("defaultPassword").getOrElse("")
     )
   }
 

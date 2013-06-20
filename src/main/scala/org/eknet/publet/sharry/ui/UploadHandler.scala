@@ -81,7 +81,7 @@ class UploadHandler extends ScalaScript with Logging {
             case _ => warn("No email for user '"+owner+"'!")
           }
         }
-        resp.right.map(_.copy(password = Array())).fold(failure, success)
+        resp.right.map(_.copy(password = "")).fold(failure, success)
       }
       case _ => makeJson(Map("success" -> false, "message" -> "Alias not found."))
     }
@@ -111,7 +111,7 @@ class UploadHandler extends ScalaScript with Logging {
     val timeout = longParam("timeout").filter(_ > 0).map(_.days)
     val req = AddRequest(
       files = uploads,
-      password = param("password").map(_.toCharArray).getOrElse(Array()),
+      password = param("password").getOrElse(""),
       owner = Security.username,
       timeout = timeout,
       filename = param("name")

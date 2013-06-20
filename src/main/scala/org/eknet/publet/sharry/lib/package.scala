@@ -24,6 +24,7 @@ import java.nio.file.{FileVisitResult, SimpleFileVisitor, OpenOption, StandardCo
 import java.io.{BufferedInputStream, IOException, InputStreamReader, BufferedReader, OutputStreamWriter, BufferedWriter, OutputStream, InputStream}
 import java.security.{DigestInputStream, MessageDigest}
 import javax.xml.bind.DatatypeConverter
+import scala.io.Codec
 
 /**
  * This package contains the base of the sharry functionality, not depending
@@ -230,5 +231,11 @@ package object lib {
     while (mdin.read() != -1) {}
     mdin.close()
     DatatypeConverter.printHexBinary(md5.digest()).toLowerCase
+  }
+
+  def createSha(s: String) = {
+    val md = MessageDigest.getInstance("SHA-256")
+    md.update(s.getBytes(Codec.UTF8.name()))
+    md.digest()
   }
 }

@@ -24,6 +24,7 @@ import java.security.{DigestOutputStream, MessageDigest}
 import java.util.concurrent.atomic.{AtomicLong, AtomicInteger}
 import javax.xml.bind.DatatypeConverter
 import org.eknet.publet.vfs.util.ByteSize
+import scala.io.Codec
 
 /**
  * @author Eike Kettner eike.kettner@gmail.com
@@ -39,7 +40,7 @@ class SharryImpl(folder: Path, var folderSizeLimit: Long) extends Sharry with Lo
     def accept(entry: Path) = ff(entry)
   }
 
-  def addFiles(files: Iterable[Entry], owner: String, password: Array[Char], timeout: Option[Timeout]) = {
+  def addFiles(files: Iterable[Entry], owner: String, password: String, timeout: Option[Timeout]) = {
     require(owner != null && !owner.isEmpty, "Owner is required")
     require(password != null && password.length > 0, "password is required")
     require(!files.isEmpty, "No files to store.")
@@ -55,7 +56,7 @@ class SharryImpl(folder: Path, var folderSizeLimit: Long) extends Sharry with Lo
         size = zip.fileSize
       )
       val file = folder / name.fullName
-      SymmetricCrypt.encrypt(zip, file, password)
+      SymmetricCrypt.encrypt(zip, file, password, createSha(password))
       zip.deleteIfExists()
       Right(name)
     }
@@ -68,7 +69,7 @@ class SharryImpl(folder: Path, var folderSizeLimit: Long) extends Sharry with Lo
       case Some(file) => {
         val md5 = MessageDigest.getInstance("MD5")
         val mdout = new DigestOutputStream(out, md5)
-        SymmetricCrypt.decrypt(file, mdout, password.toCharArray)
+        SymmetricCrypt.decrypt(file, mdout, password, createSha(password))
         mdout.flush()
         val digest = DatatypeConverter.printHexBinary(md5.digest()).toLowerCase
         if (digest != name.checksum) {
@@ -82,7 +83,7 @@ class SharryImpl(folder: Path, var folderSizeLimit: Long) extends Sharry with Lo
   def decryptFile(name: FileName, password: String, target: Path) {
     lookupFile(name) match {
       case Some(file) => {
-        SymmetricCrypt.decrypt(file, target, password.toCharArray)
+        SymmetricCrypt.decrypt(file, target, password, createSha(password))
         val digest = createMd5(target.getInput())
         if (digest != name.checksum) {
           ioError("Decrypting failed.")
